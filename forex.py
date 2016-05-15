@@ -3,6 +3,7 @@ import pandas
 import pickle
 import os
 import functools
+import math
 
 def main(origin, interval):
 	if(origin[-1] != "/"): origin += "/"
@@ -46,21 +47,42 @@ def aggregateFile(filename, origin, dest, interval, limit_rows = None):
 	del df['lTid']
 	del df['cDealable']
 	del df['CurrencyPair']
+	df.index.names = ['DateTime']
+	df.columns = ['Buy', 'Sell']
 
 	# group every 15 minutes and create OHLC
 	grouped_data = df.resample(interval + 'Min').ohlc()
 	#grouped_data = df.resample('24H', how='ohlc')
 
+	# Non-existing rows are inserted with NaN values. Set all values to last "close"
+	grouped_data = cleanData(grouped_data)
+
 	# save to file
 	grouped_data.to_pickle(dest + filename + '-OHLC.pkl')
+
+def cleanData(df):
+	last_buy_close = 0
+	last_sell_close = 0
+	for index in df.index:
+		buy_close = df.loc[index]['Buy']['close']
+		sell_close = df.loc[index]['Sell']['close']
+		if(math.isnan(buy_close)):
+			df.set_value(index, ('Buy', 'open'), last_buy_close)
+			df.set_value(index, ('Buy', 'high'), last_buy_close)
+			df.set_value(index, ('Buy', 'low'), last_buy_close)
+			df.set_value(index, ('Buy', 'close'), last_buy_close)
+			df.set_value(index, ('Sell', 'open'), last_sell_close)
+			df.set_value(index, ('Sell', 'high'), last_sell_close)
+			df.set_value(index, ('Sell', 'low'), last_sell_close)
+			df.set_value(index, ('Sell', 'close'), last_sell_close)
+		else:
+			last_buy_close = buy_close
+			last_sell_close = sell_close
+	return df
 
 def parse(timestamps):
 	clean = timestamps.split(".")[0] if '.' in timestamps else timestamps
 	return pandas.datetime.strptime(clean,"%Y-%m-%d %H:%M:%S")
-
-def readPkl(filename):
-	pkl_file = open(filename, 'rb')
-	return pickle.load(pkl_file)
 
 class Folder:
 	def __init__(self, root, folder, currency, year, month, files):
