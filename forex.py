@@ -1,9 +1,8 @@
 import sys
-import pandas
-import pickle
-import os
 import functools
+import os
 import math
+import pandas
 
 def main(origin, interval):
 	if(origin[-1] != "/"): origin += "/"
@@ -15,15 +14,18 @@ def main(origin, interval):
 
 	processed_number = 0
 	number_of_files = functools.reduce(lambda len1, len2: len1 + len2, map(lambda folder: len(folder.files), folders), 0)
+	frames = []
 	for folder in folders:
-		origin = folder.getOriginString();
-		destination = folder.getDestString(interval + 'min');
-		folder.createIfNotExists(destination);
+		origin = folder.getOriginString()
 		filenames = folder.files
 		for filename in filenames:
-			aggregateFile(filename, origin, destination, interval)
+			frames.append(aggregateFile(filename, origin, interval))
 			processed_number += 1
 			print("Finished file ", processed_number, " of ", number_of_files)
+
+	frame = pandas.concat(frames)
+	frame.to_pickle('Result-OHLC.pkl')
+
 
 def getFolders(path, excludedNames):
 	folders = []
@@ -32,7 +34,7 @@ def getFolders(path, excludedNames):
 		files = list(filter(lambda x: x not in excludedNames, files))
 		if len(files) == 0: continue
 
-		root = root.split('/');
+		root = root.split('/')
 		month = root[-1]
 		year = root[-2]
 		currency = root[-3]
@@ -41,7 +43,7 @@ def getFolders(path, excludedNames):
 		folders.append(Folder(root, folder, currency, year, month, files))
 	return folders
 
-def aggregateFile(filename, origin, dest, interval, limit_rows = None):
+def aggregateFile(filename, origin, interval, limit_rows=None):
 	df = pandas.read_csv(origin + filename, parse_dates=True, index_col=3, date_parser=parse, nrows=limit_rows)
 
 	del df['lTid']
@@ -56,9 +58,7 @@ def aggregateFile(filename, origin, dest, interval, limit_rows = None):
 
 	# Non-existing rows are inserted with NaN values. Set all values to last "close"
 	grouped_data = cleanData(grouped_data)
-
-	# save to file
-	grouped_data.to_pickle(dest + filename + '-OHLC.pkl')
+	return grouped_data
 
 def cleanData(df):
 	last_buy_close = 0
@@ -82,7 +82,7 @@ def cleanData(df):
 
 def parse(timestamps):
 	clean = timestamps.split(".")[0] if '.' in timestamps else timestamps
-	return pandas.datetime.strptime(clean,"%Y-%m-%d %H:%M:%S")
+	return pandas.datetime.strptime(clean, "%Y-%m-%d %H:%M:%S")
 
 class Folder:
 	def __init__(self, root, folder, currency, year, month, files):
