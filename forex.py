@@ -24,7 +24,7 @@ def main(origin, interval):
 			print("Finished file ", processed_number, " of ", number_of_files)
 
 	frame = pandas.concat(frames)
-	frame.to_pickle('Result-OHLC.pkl')
+	frame.to_pickle(current_path + 'Result-OHLC.pkl')
 
 
 def getFolders(path, excludedNames):
@@ -49,14 +49,14 @@ def aggregateFile(filename, origin, interval, limit_rows=None):
 	del df['lTid']
 	del df['cDealable']
 	del df['CurrencyPair']
-	df.index.names = ['DateTime']
-	df.columns = ['Buy', 'Sell']
+	df.index.names = ['datetime']
+	df.columns = ['buy', 'sell']
 
 	# group every 15 minutes and create OHLC
 	grouped_data = df.resample(interval + 'Min').ohlc()
 	#grouped_data = df.resample('24H', how='ohlc')
 
-	# Non-existing rows are inserted with NaN values. Set all values to last "close"
+	# Non-existing rows are inserted with NaN values: Set all values to last "close"
 	grouped_data = cleanData(grouped_data)
 	return grouped_data
 
@@ -64,17 +64,17 @@ def cleanData(df):
 	last_buy_close = 0
 	last_sell_close = 0
 	for index in df.index:
-		buy_close = df.loc[index]['Buy']['close']
-		sell_close = df.loc[index]['Sell']['close']
+		buy_close = df.loc[index]['buy']['close']
+		sell_close = df.loc[index]['sell']['close']
 		if(math.isnan(buy_close)):
-			df.set_value(index, ('Buy', 'open'), last_buy_close)
-			df.set_value(index, ('Buy', 'high'), last_buy_close)
-			df.set_value(index, ('Buy', 'low'), last_buy_close)
-			df.set_value(index, ('Buy', 'close'), last_buy_close)
-			df.set_value(index, ('Sell', 'open'), last_sell_close)
-			df.set_value(index, ('Sell', 'high'), last_sell_close)
-			df.set_value(index, ('Sell', 'low'), last_sell_close)
-			df.set_value(index, ('Sell', 'close'), last_sell_close)
+			df.set_value(index, ('buy', 'open'), last_buy_close)
+			df.set_value(index, ('buy', 'high'), last_buy_close)
+			df.set_value(index, ('buy', 'low'), last_buy_close)
+			df.set_value(index, ('buy', 'close'), last_buy_close)
+			df.set_value(index, ('sell', 'open'), last_sell_close)
+			df.set_value(index, ('sell', 'high'), last_sell_close)
+			df.set_value(index, ('sell', 'low'), last_sell_close)
+			df.set_value(index, ('sell', 'close'), last_sell_close)
 		else:
 			last_buy_close = buy_close
 			last_sell_close = sell_close
