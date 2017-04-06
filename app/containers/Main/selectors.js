@@ -8,7 +8,10 @@ const selectMainDomain = () => (state) => state.get('main');
 /**
  * Other specific selectors
  */
-
+const selectPlots = () => createSelector(
+  selectMainDomain(),
+  (mainState) => mainState.get('plots'),
+);
 
 /**
  * Default selector used by Main
@@ -16,10 +19,11 @@ const selectMainDomain = () => (state) => state.get('main');
 
 const makeSelectMain = () => createSelector(
   selectMainDomain(),
-  (substate) => substate.toJS()
+  (substate) => substate.toJS(),
 );
 
-export default makeSelectMain;
 export {
+  makeSelectMain,
   selectMainDomain,
+  selectPlots,
 };

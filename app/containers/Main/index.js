@@ -1,26 +1,14 @@
-/*
- *
- * Main
- *
- */
-
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { createStructuredSelector } from 'reselect';
+import Immutable from 'immutable';
 
-import makeSelectMain from './selectors';
+import { makeSelectMain, selectPlots } from './selectors';
 import PlotList from '../../components/PlotList';
 import { click } from './actions';
 
 export class Main extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      plots: ['Hei'],
-    };
-  }
-
   componentDidMount() {
     
   }
@@ -34,7 +22,7 @@ export class Main extends React.PureComponent {
             { name: 'description', content: 'Description of Main' },
           ]}
         />
-        <PlotList plots={this.state.plots} />
+        <PlotList plots={this.props.plots} />
         <button onClick={this.props.click}>Klikk</button>
       </div>
     );
@@ -43,15 +31,21 @@ export class Main extends React.PureComponent {
 
 Main.propTypes = {
   //dispatch: PropTypes.func.isRequired,
+  plots: PropTypes.oneOfType([
+    PropTypes.instanceOf(Immutable.Iterable).isRequired,
+    PropTypes.array.isRequired
+  ]),
+  click: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
   Main: makeSelectMain(),
+  plots: selectPlots(),
 });
 
 function mapDispatchToProps(dispatch) {
   return {
-    click: () => click(),
+    click: () => dispatch(click()),
   };
 }
 

@@ -3,6 +3,7 @@ import React from 'react';
 
 
 function PlotList(props) {
+  console.log(props.plots);
   const plots = props.plots.map((plot, index) =>
     <li key={index}>{plot}</li>
   );
