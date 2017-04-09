@@ -72,8 +72,8 @@ const mapStateToProps = createStructuredSelector({
 function mapDispatchToProps(dispatch) {
   return {
     toggleSidebar: () => dispatch(toggleSidebar()),
-    toggleIndicator: (key, value) => dispatch(toggleIndicator(key, value)),
-    togglePrediction: (key, value) => dispatch(togglePrediction(key, value)),
+    toggleIndicator: (options) => dispatch(toggleIndicator(options)),
+    togglePrediction: (options) => dispatch(togglePrediction(options)),
   };
 }
 

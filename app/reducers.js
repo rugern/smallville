@@ -60,9 +60,9 @@ function websocketReducer(state = websocketInitialState, action) {
     case SET_INDICATORS:
       return state.set('indicators', state.get('indicators').mergeDeep(action.indicators));
     case TOGGLE_PREDICTION:
-      return state.setIn(['predictions', action.key, 'plot'], action.value);
+      return state.setIn(['predictions', action.options.keys[0], 'show'], action.options.data);
     case TOGGLE_INDICATOR:
-      return state.setIn(['indicators', action.key, 'plot'], action.value);
+      return state.setIn(['indicators', action.options.keys[0], 'show'], action.options.data);
     default:
       return state;
   }

@@ -32,7 +32,6 @@ export default function websocketMiddleware(store) {
   return next => action => {
     if (action.meta && action.meta.websocket) {
       socket.emit(action.type, action.options);
-      return;
     }
     return next(action);
   };

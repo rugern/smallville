@@ -49,18 +49,28 @@ export function getPredictions(options) {
   };
 }
 
-export function togglePrediction(key, value) {
+export function togglePrediction(options) {
   return {
     type: TOGGLE_PREDICTION,
-    key,
-    value,
+    options: {
+      keys: [options.key],
+      data: options.data,
+    },
+    meta: {
+      websocket: true,
+    },
   };
 }
 
-export function toggleIndicator(key, value) {
+export function toggleIndicator(options) {
   return {
     type: TOGGLE_INDICATOR,
-    key,
-    value,
+    options: {
+      keys: [options.key],
+      data: options.data,
+    },
+    meta: {
+      websocket: true,
+    },
   };
 }

@@ -18,7 +18,7 @@ const itemStyle = {
 function PlotList(props) {
   const items = Object.keys(props.items).map((key, index) =>
     <ListItem primaryText={key} key={index} innerDivStyle={itemStyle} rightToggle={
-      <Toggle onToggle={(evt, value) => props.toggleItem(key, value)}/>
+      <Toggle onToggle={(evt, data) => props.toggleItem({key, data})}/>
     } />
   );
 
