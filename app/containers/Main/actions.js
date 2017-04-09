@@ -1,22 +1,12 @@
-/*
- *
- * Main actions
- *
- */
-
 import {
-  DEFAULT_ACTION,
+  START_TRAINING,
 } from './constants';
 
-export function defaultAction() {
+export function startTraining() {
   return {
-    type: DEFAULT_ACTION,
-  };
-}
-
-export function click() {
-  console.log('click');
-  return {
-    type: 'click',
+    type: START_TRAINING,
+    meta: {
+      websocket: true,
+    }
   };
 }

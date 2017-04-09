@@ -1,7 +1,1 @@
-/*
- *
- * Main constants
- *
- */
-
-export const DEFAULT_ACTION = 'app/Main/DEFAULT_ACTION';
+export const START_TRAINING = 'start_training';

@@ -10,3 +10,4 @@
  */
 
 export const DEFAULT_LOCALE = 'en';
+export const TOGGLE_SIDEBAR = 'toggle_sidebar';
