@@ -12,6 +12,9 @@ import {
   TOGGLE_INDICATOR,
   SET_METROPOLIS_STATUS,
   SET_MODEL_NAME,
+  SET_EPOCHS,
+  SET_OFFSET,
+  SET_LIMIT,
 } from './constants';
 
 const initialState = fromJS({
@@ -21,6 +24,9 @@ const initialState = fromJS({
   indicators: {},
   labels: [],
   modelName: 'Test',
+  epochs: 1,
+  offset: 0,
+  limit: 200,
 });
 
 function randomInt(min, max) {
@@ -60,6 +66,12 @@ function mainReducer(state = initialState, action) {
       return state.setIn(['indicators', action.payload.key, 'show'], action.payload.value);
     case SET_MODEL_NAME:
       return state.set('modelName', action.payload);
+    case SET_EPOCHS:
+      return state.set('epochs', action.payload);
+    case SET_OFFSET:
+      return state.set('offset', action.payload);
+    case SET_LIMIT:
+      return state.set('limit', action.payload);
     default:
       return state;
   }

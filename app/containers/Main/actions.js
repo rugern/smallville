@@ -15,6 +15,9 @@ import {
   SET_METROPOLIS_STATUS,
   START_TRAIN,
   SET_MODEL_NAME,
+  SET_EPOCHS,
+  SET_OFFSET,
+  SET_LIMIT,
 } from './constants';
 
 export function defaultAction() {
@@ -79,6 +82,27 @@ export function startTrain() {
 export function setModelName(payload) {
   return {
     type: SET_MODEL_NAME,
+    payload,
+  };
+}
+
+export function setEpochs(payload) {
+  return {
+    type: SET_EPOCHS,
+    payload,
+  };
+}
+
+export function setOffset(payload) {
+  return {
+    type: SET_OFFSET,
+    payload,
+  };
+}
+
+export function setLimit(payload) {
+  return {
+    type: SET_LIMIT,
     payload,
   };
 }

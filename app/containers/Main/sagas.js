@@ -12,11 +12,18 @@ import {
 import {
   SET_DATA,
   GET_DATA,
+  SET_OFFSET,
+  SET_LIMIT,
   SET_METROPOLIS_STATUS,
   GET_METROPOLIS_STATUS,
   START_TRAIN,
   SET_MODEL_NAME,
+  SET_EPOCHS,
 } from './constants';
+import {
+  selectOffset,
+  selectLimit,
+} from './selectors';
 
 
 function createChannel(socket, eventName) {
@@ -53,17 +60,30 @@ export function* takeDisconnectChannel(socket) {
   }
 }
 
-function* takeDataChannel(socket, action) {
+export function* takeDataChannel(socket) {
   const dataChannel = yield call(createChannel, socket, SET_DATA);
-  yield apply(socket, socket.emit, [action.type, {}]);
   while (true) {
     const payload = yield take(dataChannel);
     yield put(setData(payload));
   }
 }
 
-export function* takeData(socket) {
-  yield takeEvery(GET_DATA, takeDataChannel, socket);
+function* emitGetData(socket) {
+  const offset = yield select(selectOffset());
+  const limit = yield select(selectLimit());
+  yield apply(socket, socket.emit, [GET_DATA, {offset, limit}]);
+}
+
+export function* takeGetData(socket) {
+  yield takeLatest(GET_DATA, emitGetData, socket);
+}
+
+export function* takeSetOffset(socket) {
+  yield takeLatest(SET_OFFSET, emitGetData, socket);
+}
+
+export function* takeSetLimit(socket) {
+  yield takeLatest(SET_LIMIT, emitGetData, socket);
 }
 
 function* takeStatusChannel(socket, action) {
@@ -90,12 +110,18 @@ export function* emitStartTrain(socket) {
   }
 }
 
-function* emitModelName(socket, action) {
-  yield apply(socket, socket.emit, [action.type, action.payload]);
+export function* emitModelName(socket) {
+  while (true) {
+    const action = yield take(SET_MODEL_NAME);
+    yield apply(socket, socket.emit, [action.type, action.payload]);
+  }
 }
 
-export function* takeModelName(socket) {
-  yield takeEvery(SET_MODEL_NAME, emitModelName, socket);
+export function* emitEpochs(socket) {
+  while (true) {
+    const action = yield take(SET_EPOCHS);
+    yield apply(socket, socket.emit, [action.type, action.payload]);
+  }
 }
 
 export function* receiveWebsocketData() {
@@ -103,10 +129,14 @@ export function* receiveWebsocketData() {
   yield [
     call(takeConnectChannel, socket),
     call(takeDisconnectChannel, socket),
-    call(takeData, socket),
+    call(takeDataChannel, socket),
+    call(emitGetData, socket),
     call(takeStatus, socket),
     call(emitStartTrain, socket),
-    call(takeModelName, socket),
+    call(emitModelName, socket),
+    call(emitEpochs, socket),
+    call(takeSetOffset, socket),
+    call(takeSetLimit, socket),
   ];
 }
 

@@ -11,7 +11,7 @@ import {
 } from './constants';
 
 const initialState = fromJS({
-  sidebarOpen: false,
+  sidebarOpen: true,
 });
 
 function sidebarReducer(state = initialState, action) {

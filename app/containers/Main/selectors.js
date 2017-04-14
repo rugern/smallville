@@ -38,6 +38,21 @@ const selectModelName = () => createSelector(
   (state) => state.get('modelName')
 );
 
+const selectEpochs = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('epochs')
+);
+
+const selectOffset = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('offset')
+);
+
+const selectLimit = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('limit')
+);
+
 /**
  * Default selector used by Main
  */
@@ -56,4 +71,7 @@ export {
   selectLabels,
   selectMetropolisStatus,
   selectModelName,
+  selectEpochs,
+  selectOffset,
+  selectLimit,
 };
