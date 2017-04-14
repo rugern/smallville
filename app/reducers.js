@@ -9,13 +9,6 @@ import { LOCATION_CHANGE } from 'react-router-redux';
 
 import languageProviderReducer from 'containers/LanguageProvider/reducer';
 import sidebarReducer from './containers/Sidebar/reducer';
-import {
-  SET_CONNECTION_STATUS,
-  SET_INDICATORS,
-  SET_PREDICTIONS,
-  TOGGLE_PREDICTION,
-  TOGGLE_INDICATOR,
-} from './constants';
 
 /*
  * routeReducer
@@ -28,12 +21,6 @@ import {
 // Initial routing state
 const routeInitialState = fromJS({
   locationBeforeTransitions: null,
-});
-
-const websocketInitialState = fromJS({
-  connectionStatus: 'Disconnected',
-  predictions: {},
-  indicators: {},
 });
 
 /**
@@ -51,23 +38,6 @@ function routeReducer(state = routeInitialState, action) {
   }
 }
 
-function websocketReducer(state = websocketInitialState, action) {
-  switch (action.type) {
-    case SET_CONNECTION_STATUS:
-      return state.set('connectionStatus', action.status);
-    case SET_PREDICTIONS:
-      return state.set('predictions', state.get('predictions').mergeDeep(action.predictions));
-    case SET_INDICATORS:
-      return state.set('indicators', state.get('indicators').mergeDeep(action.indicators));
-    case TOGGLE_PREDICTION:
-      return state.setIn(['predictions', action.options.keys[0], 'show'], action.options.data);
-    case TOGGLE_INDICATOR:
-      return state.setIn(['indicators', action.options.keys[0], 'show'], action.options.data);
-    default:
-      return state;
-  }
-}
-
 /**
  * Creates the main reducer with the asynchronously loaded ones
  */
@@ -76,7 +46,7 @@ export default function createReducer(asyncReducers) {
     route: routeReducer,
     language: languageProviderReducer,
     sidebar: sidebarReducer,
-    websocket: websocketReducer,
+    //websocket: websocketReducer,
     ...asyncReducers,
   });
 }

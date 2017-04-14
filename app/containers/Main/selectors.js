@@ -8,6 +8,35 @@ const selectMainDomain = () => (state) => state.get('main');
 /**
  * Other specific selectors
  */
+const selectConnectionStatus = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('connectionStatus')
+);
+
+const selectPredictions = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('predictions').toJS()
+);
+
+const selectIndicators = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('indicators').toJS()
+);
+
+const selectLabels = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('labels').toJS()
+);
+
+const selectMetropolisStatus = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('metropolisStatus')
+);
+
+const selectModelName = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('modelName')
+);
 
 /**
  * Default selector used by Main
@@ -21,4 +50,10 @@ const makeSelectMain = () => createSelector(
 export default makeSelectMain;
 export {
   selectMainDomain,
+  selectConnectionStatus,
+  selectIndicators,
+  selectPredictions,
+  selectLabels,
+  selectMetropolisStatus,
+  selectModelName,
 };

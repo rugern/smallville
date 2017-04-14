@@ -7,7 +7,6 @@ import { fromJS } from 'immutable';
 import { routerMiddleware } from 'react-router-redux';
 import createSagaMiddleware from 'redux-saga';
 import createReducer from './reducers';
-import websocketMiddleware from './websocketMiddleware';
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -18,7 +17,6 @@ export default function configureStore(initialState = {}, history) {
   const middlewares = [
     sagaMiddleware,
     routerMiddleware(history),
-    websocketMiddleware,
   ];
 
   const enhancers = [
