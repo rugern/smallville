@@ -53,6 +53,11 @@ const selectLimit = () => createSelector(
   (state) => state.get('limit')
 );
 
+const selectModels = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('models').toJS()
+);
+
 /**
  * Default selector used by Main
  */
@@ -74,4 +79,5 @@ export {
   selectEpochs,
   selectOffset,
   selectLimit,
+  selectModels,
 };

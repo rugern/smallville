@@ -27,6 +27,7 @@ const initialState = fromJS({
   epochs: 1,
   offset: 0,
   limit: 200,
+  models: [],
 });
 
 function randomInt(min, max) {
@@ -57,8 +58,13 @@ function mainReducer(state = initialState, action) {
     case SET_DATA:
       const indicators = mapColor(action.payload.indicators);
       const predictions = mapColor(action.payload.predictions);
+      const predictionKeys = Object.keys(predictions);
       state = state.set('indicators', state.get('indicators').mergeDeep(indicators));
-      state = state.set('predictions', state.get('predictions').mergeDeep(predictions));
+      state = state.set('predictions', state.get('predictions')
+        .mergeDeep(predictions)
+        .filter((value, key) => predictionKeys.indexOf(key) !== -1)
+      );
+      state = state.set('models', fromJS(action.payload.models));
       return state.set('labels', fromJS(action.payload.labels));
     case TOGGLE_PREDICTION:
       return state.setIn(['predictions', action.payload.key, 'show'], action.payload.value);

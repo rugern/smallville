@@ -19,10 +19,12 @@ import {
   START_TRAIN,
   SET_MODEL_NAME,
   SET_EPOCHS,
+  DELETE_MODEL,
 } from './constants';
 import {
   selectOffset,
   selectLimit,
+  selectModelName,
 } from './selectors';
 
 
@@ -49,6 +51,8 @@ export function* takeConnectChannel(socket) {
     yield put(setConnectionStatus(payload));
     yield put(getMetropolisStatus());
     yield put(getData());
+    const modelName = yield(select(selectModelName()));
+    yield apply(socket, socket.emit, [SET_MODEL_NAME, modelName]);
   }
 }
 
@@ -86,20 +90,22 @@ export function* takeSetLimit(socket) {
   yield takeLatest(SET_LIMIT, emitGetData, socket);
 }
 
-function* takeStatusChannel(socket, action) {
+export function* takeStatusChannel(socket, action) {
   const statusChannel = yield call(createChannel, socket, SET_METROPOLIS_STATUS);
-  yield apply(socket, socket.emit, [action.type]);
   while (true) {
     const payload = yield take(statusChannel);
     yield put(setMetropolisStatus(payload));
     if (payload === 'Idle') {
-      yield put(getData());
+      yield call(emitGetData, socket);
     }
   }
 }
 
 export function* takeStatus(socket) {
-  yield takeEvery(GET_METROPOLIS_STATUS, takeStatusChannel, socket);
+  while (true) {
+    const action = yield take(GET_METROPOLIS_STATUS);
+    yield apply(socket, socket.emit, [action.type]);
+  }
 }
 
 export function* emitStartTrain(socket) {
@@ -124,6 +130,13 @@ export function* emitEpochs(socket) {
   }
 }
 
+export function* emitDeleteModel(socket) {
+  while (true) {
+    const action = yield take(DELETE_MODEL);
+    yield apply(socket, socket.emit, [action.type, action.payload]);
+  }
+}
+
 export function* receiveWebsocketData() {
   const socket = yield call(() => io.connect('http://localhost:5000'));
   yield [
@@ -132,11 +145,13 @@ export function* receiveWebsocketData() {
     call(takeDataChannel, socket),
     call(emitGetData, socket),
     call(takeStatus, socket),
+    call(takeStatusChannel, socket),
     call(emitStartTrain, socket),
     call(emitModelName, socket),
     call(emitEpochs, socket),
     call(takeSetOffset, socket),
     call(takeSetLimit, socket),
+    call(emitDeleteModel, socket),
   ];
 }
 

@@ -6,6 +6,10 @@ import Divider from 'material-ui/Divider';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import Slider from 'material-ui/Slider';
+import {List, ListItem} from 'material-ui/List';
+import Delete from 'material-ui/svg-icons/action/delete';
+import Menu from 'material-ui/Menu';
+import MenuItem from 'material-ui/MenuItem';
 
 import ControlPanel from '../../components/ControlPanel';
 import Chart from '../../components/Chart';
@@ -22,6 +26,7 @@ import {
   selectEpochs,
   selectOffset,
   selectLimit,
+  selectModels,
 } from './selectors';
 import {
   toggleIndicator,
@@ -31,14 +36,14 @@ import {
   setEpochs,
   setOffset,
   setLimit,
+  deleteModel,
 } from './actions';
 import {
   selectSidebarOpen,
 } from '../Sidebar/selectors';
 
 const Info = styled.h5`
-text-align: center;
-margin: 30px auto;
+text-align: ${props => props.center ? 'center' : 'left'};
 `;
 
 const Body = styled.div`
@@ -47,12 +52,19 @@ padding: 20px;
 margin: ${props => props.sidebarOpen ? '0 auto 0 256px' : '0 auto'};
 `;
 
-const Container = styled.div`
+const Row = styled.div`
 display: flex;
 flex-direction: row;
-max-width: 80%;
-margin: 0 auto;
-padding: 10px 0;
+width: 100%;
+margin: 0;
+padding: 10px;
+`;
+
+const Column = styled.div`
+display: flex;
+flex-direction: column;
+padding: 20px;
+width: calc(100% * ${props => props.width / 12});
 `;
 
 const Label = styled.h5`
@@ -68,14 +80,26 @@ const sliderStyle = {
   margin: 0,
 };
 
+const itemStyle = {
+  fontSize: '12px',
+  padding: '10px',
+  marginLeft: '14px',
+};
+
 export class Main extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
 
   render() {
+    const models = this.props.models.map((model, index) => 
+      <MenuItem primaryText={model} key={index}
+        onTouchTap={() => this.props.setModelName(model)}
+        leftIcon={<Delete onTouchTap={(evt) => this.props.deleteModel(evt, model)}/>} />
+    );
+
     return (
       <div>
         <Sidebar connectionStatus={this.props.connectionStatus}
           indicators={this.props.indicators}>
-          <Info>Connection status: {this.props.connectionStatus}</Info>
+          <Info center>Connection status: {this.props.connectionStatus}</Info>
           <Divider />
           <PlotList header="Indicators" items={this.props.indicators}
             toggleItem={this.props.toggleIndicator}/>
@@ -86,34 +110,44 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
 
         <Body sidebarOpen={this.props.sidebarOpen}>
           <ControlPanel>
-            <Info>Metropolis status: {this.props.metropolisStatus}</Info>
+            <Row>
+              <Column width={3}>
+                <Menu>
+                  {models}
+                </Menu>
+                <TextField floatingLabelText="Name" value={this.props.modelName}
+                  onChange={(evt, newValue) => this.props.setModelName(newValue)}/>
+                <RaisedButton label="Train" primary={true} 
+                  onClick={this.props.startTrain}
+                  disabled={this.props.metropolisStatus === 'Running'}/>
+              </Column>
 
-            <TextField floatingLabelText="Name" value={this.props.modelName}
-              onChange={(evt, newValue) => this.props.setModelName(newValue)}/>
+              <Column width={9}>
+                <Row>
+                  <Info>Metropolis status: {this.props.metropolisStatus}</Info>
+                </Row>
+                <Row>
+                  <Label>Epochs: {this.props.epochs}</Label>
+                  <Slider min={1} max={20} step={1} value={this.props.epochs}
+                    style={outerSliderStyle} sliderStyle={sliderStyle}
+                    onChange={(evt, newValue) => this.props.setEpochs(newValue)} />
+                </Row>
 
-            <RaisedButton label="Train" onClick={this.props.startTrain}
-              disabled={this.props.metropolisStatus === 'Running'}/>
+                <Row>
+                  <Label>Offset: {this.props.offset}</Label>
+                  <Slider min={0} max={200} step={1} value={this.props.offset}
+                    style={outerSliderStyle} sliderStyle={sliderStyle}
+                    onChange={(evt, newValue) => this.props.setOffset(newValue)} />
+                </Row>
 
-            <Container>
-              <Label>Epochs: {this.props.epochs}</Label>
-              <Slider min={1} max={20} step={1} value={this.props.epochs}
-                style={outerSliderStyle} sliderStyle={sliderStyle}
-                onChange={(evt, newValue) => this.props.setEpochs(newValue)} />
-            </Container>
-
-            <Container>
-              <Label>Offset: {this.props.offset}</Label>
-              <Slider min={0} max={200} step={1} value={this.props.offset}
-                style={outerSliderStyle} sliderStyle={sliderStyle}
-                onChange={(evt, newValue) => this.props.setOffset(newValue)} />
-            </Container>
-
-            <Container>
-              <Label>Limit: {this.props.limit}</Label>
-              <Slider min={1} max={200} step={1} value={this.props.limit}
-                style={outerSliderStyle} sliderStyle={sliderStyle}
-                onChange={(evt, newValue) => this.props.setLimit(newValue)} />
-            </Container>
+                <Row>
+                  <Label>Limit: {this.props.limit}</Label>
+                  <Slider min={1} max={200} step={1} value={this.props.limit}
+                    style={outerSliderStyle} sliderStyle={sliderStyle}
+                    onChange={(evt, newValue) => this.props.setLimit(newValue)} />
+                </Row>
+              </Column>
+            </Row>
           </ControlPanel>
 
           <Chart indicators={this.props.indicators}
@@ -137,6 +171,8 @@ Main.propTypes = {
   epochs: PropTypes.number.isRequired,
   offset: PropTypes.number.isRequired,
   limit: PropTypes.number.isRequired,
+  models: PropTypes.array.isRequired,
+  deleteModel: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -151,6 +187,7 @@ const mapStateToProps = createStructuredSelector({
   epochs: selectEpochs(),
   offset: selectOffset(),
   limit: selectLimit(),
+  models: selectModels(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -162,6 +199,10 @@ function mapDispatchToProps(dispatch) {
     setEpochs: (payload) => dispatch(setEpochs(payload)),
     setOffset: (payload) => dispatch(setOffset(payload)),
     setLimit: (payload) => dispatch(setLimit(payload)),
+    deleteModel: (evt, payload) => {
+      evt.stopPropagation();
+      dispatch(deleteModel(payload));
+    },
   };
 }
 
