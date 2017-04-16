@@ -20,6 +20,7 @@ import {
   SET_MODEL_NAME,
   SET_EPOCHS,
   DELETE_MODEL,
+  SET_DATAFILE,
 } from './constants';
 import {
   selectOffset,
@@ -137,6 +138,14 @@ export function* emitDeleteModel(socket) {
   }
 }
 
+export function* emitSetDatafile(socket) {
+  while (true) {
+    const action = yield take(SET_DATAFILE);
+    yield apply(socket, socket.emit, [action.type, action.payload]);
+    yield call(emitGetData, socket);
+  }
+}
+
 export function* receiveWebsocketData() {
   const socket = yield call(() => io.connect('http://localhost:5000'));
   yield [
@@ -152,6 +161,7 @@ export function* receiveWebsocketData() {
     call(takeSetOffset, socket),
     call(takeSetLimit, socket),
     call(emitDeleteModel, socket),
+    call(emitSetDatafile, socket),
   ];
 }
 

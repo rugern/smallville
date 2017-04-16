@@ -19,6 +19,7 @@ import {
   SET_OFFSET,
   SET_LIMIT,
   DELETE_MODEL,
+  SET_DATAFILE,
 } from './constants';
 
 export function defaultAction() {
@@ -111,6 +112,13 @@ export function setLimit(payload) {
 export function deleteModel(payload) {
   return {
     type: DELETE_MODEL,
+    payload,
+  };
+}
+
+export function setDatafile(payload) {
+  return {
+    type: SET_DATAFILE,
     payload,
   };
 }

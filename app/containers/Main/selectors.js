@@ -58,6 +58,16 @@ const selectModels = () => createSelector(
   (state) => state.get('models').toJS()
 );
 
+const selectDatafiles = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('datafiles').toJS()
+);
+
+const selectDatafile = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('datafile')
+);
+
 /**
  * Default selector used by Main
  */
@@ -80,4 +90,6 @@ export {
   selectOffset,
   selectLimit,
   selectModels,
+  selectDatafiles,
+  selectDatafile,
 };

@@ -15,6 +15,7 @@ import {
   SET_EPOCHS,
   SET_OFFSET,
   SET_LIMIT,
+  SET_DATAFILE,
 } from './constants';
 
 const initialState = fromJS({
@@ -28,6 +29,7 @@ const initialState = fromJS({
   offset: 0,
   limit: 200,
   models: [],
+  datafiles: [],
 });
 
 function randomInt(min, max) {
@@ -65,6 +67,8 @@ function mainReducer(state = initialState, action) {
         .filter((value, key) => predictionKeys.indexOf(key) !== -1)
       );
       state = state.set('models', fromJS(action.payload.models));
+      state = state.set('datafiles', fromJS(action.payload.datafiles));
+      state = state.set('datafile', action.payload.datafile);
       return state.set('labels', fromJS(action.payload.labels));
     case TOGGLE_PREDICTION:
       return state.setIn(['predictions', action.payload.key, 'show'], action.payload.value);

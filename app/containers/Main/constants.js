@@ -18,3 +18,4 @@ export const SET_EPOCHS = 'set_epochs';
 export const SET_OFFSET = 'set_offset';
 export const SET_LIMIT = 'set_limit';
 export const DELETE_MODEL = 'delete_model';
+export const SET_DATAFILE = 'set_datafile';

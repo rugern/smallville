@@ -8,8 +8,6 @@ import TextField from 'material-ui/TextField';
 import Slider from 'material-ui/Slider';
 import {List, ListItem} from 'material-ui/List';
 import Delete from 'material-ui/svg-icons/action/delete';
-import Menu from 'material-ui/Menu';
-import MenuItem from 'material-ui/MenuItem';
 
 import ControlPanel from '../../components/ControlPanel';
 import Chart from '../../components/Chart';
@@ -27,6 +25,8 @@ import {
   selectOffset,
   selectLimit,
   selectModels,
+  selectDatafiles,
+  selectDatafile,
 } from './selectors';
 import {
   toggleIndicator,
@@ -37,6 +37,7 @@ import {
   setOffset,
   setLimit,
   deleteModel,
+  setDatafile,
 } from './actions';
 import {
   selectSidebarOpen,
@@ -72,6 +73,19 @@ width: 100px;
 margin: 0;
 `;
 
+const CustomListItem = styled.div`
+background-color: ${props => props.active ? 'rgba(0, 151, 167, 0.2)' : 'none'};
+display: flex;
+justify-content: space-between;
+padding: 5px 10px;
+font-size: 14px;
+cursor: pointer;
+
+&:hover {
+  background-color: ${props => props.active ? 'rgba(0, 151, 167, 0.4)' : 'rgba(255, 255, 255, 0.1)'};
+}
+`;
+
 const outerSliderStyle = {
   width: 'calc(100% - 100px)',
 };
@@ -86,13 +100,26 @@ const itemStyle = {
   marginLeft: '14px',
 };
 
+const listStyle = {
+  border: '1px solid white',
+};
+
 export class Main extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
 
   render() {
     const models = this.props.models.map((model, index) => 
-      <MenuItem primaryText={model} key={index}
-        onTouchTap={() => this.props.setModelName(model)}
-        leftIcon={<Delete onTouchTap={(evt) => this.props.deleteModel(evt, model)}/>} />
+      <CustomListItem active={this.props.modelName === model} key={index}
+        onClick={() => this.props.setModelName(model)}>
+        <span>{model}</span>
+        <Delete onTouchTap={(evt) => this.props.deleteModel(evt, model)}/>
+      </CustomListItem>
+    );
+
+    const datafiles = this.props.datafiles.map((datafile, index) =>
+      <CustomListItem active={this.props.datafile === datafile} key={index}
+        onClick={() => this.props.setDatafile(datafile)}>
+        <span>{datafile}</span>
+      </CustomListItem>
     );
 
     return (
@@ -112,17 +139,20 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
           <ControlPanel>
             <Row>
               <Column width={3}>
-                <Menu>
-                  {models}
-                </Menu>
-                <TextField floatingLabelText="Name" value={this.props.modelName}
-                  onChange={(evt, newValue) => this.props.setModelName(newValue)}/>
-                <RaisedButton label="Train" primary={true} 
-                  onClick={this.props.startTrain}
-                  disabled={this.props.metropolisStatus === 'Running'}/>
+                <List style={listStyle}>
+                  {datafiles}
+                </List>
               </Column>
 
-              <Column width={9}>
+              <Column width={3}>
+                <List style={listStyle}>
+                  {models}
+                </List>
+                <TextField floatingLabelText="New model" value={this.props.modelName}
+                  onChange={(evt, newValue) => this.props.setModelName(newValue)}/>
+              </Column>
+
+              <Column width={6}>
                 <Row>
                   <Info>Metropolis status: {this.props.metropolisStatus}</Info>
                 </Row>
@@ -145,6 +175,11 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                   <Slider min={1} max={200} step={1} value={this.props.limit}
                     style={outerSliderStyle} sliderStyle={sliderStyle}
                     onChange={(evt, newValue) => this.props.setLimit(newValue)} />
+                </Row>
+                <Row>
+                  <RaisedButton label="Train" primary={true} 
+                    onClick={this.props.startTrain}
+                    disabled={this.props.metropolisStatus === 'Running'}/>
                 </Row>
               </Column>
             </Row>
@@ -173,6 +208,8 @@ Main.propTypes = {
   limit: PropTypes.number.isRequired,
   models: PropTypes.array.isRequired,
   deleteModel: PropTypes.func.isRequired,
+  datafiles: PropTypes.array.isRequired,
+  setDatafile: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -188,6 +225,8 @@ const mapStateToProps = createStructuredSelector({
   offset: selectOffset(),
   limit: selectLimit(),
   models: selectModels(),
+  datafiles: selectDatafiles(),
+  datafile: selectDatafile(),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -203,6 +242,7 @@ function mapDispatchToProps(dispatch) {
       evt.stopPropagation();
       dispatch(deleteModel(payload));
     },
+    setDatafile: (payload) => dispatch(setDatafile(payload)),
   };
 }
 
