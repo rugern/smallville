@@ -30,6 +30,7 @@ const initialState = fromJS({
   limit: 200,
   models: [],
   datafiles: [],
+  datasize: 1,
 });
 
 function randomInt(min, max) {
@@ -59,9 +60,13 @@ function mainReducer(state = initialState, action) {
       return state.set('metropolisStatus', action.payload);
     case SET_DATA:
       const indicators = mapColor(action.payload.indicators);
+      const indicatorKeys = Object.keys(indicators);
       const predictions = mapColor(action.payload.predictions);
       const predictionKeys = Object.keys(predictions);
-      state = state.set('indicators', state.get('indicators').mergeDeep(indicators));
+      state = state.set('indicators', state.get('indicators')
+        .mergeDeep(indicators)
+        .filter((value, key) => indicatorKeys.indexOf(key) !== -1)
+      );
       state = state.set('predictions', state.get('predictions')
         .mergeDeep(predictions)
         .filter((value, key) => predictionKeys.indexOf(key) !== -1)
@@ -69,6 +74,10 @@ function mainReducer(state = initialState, action) {
       state = state.set('models', fromJS(action.payload.models));
       state = state.set('datafiles', fromJS(action.payload.datafiles));
       state = state.set('datafile', action.payload.datafile);
+      state = state.set('datasize', Math.max(1, action.payload.datasize)); // Avoid slider error
+      if (state.get('offset') > state.get('datasize')) {
+        state = state.set('offset', state.get('datasize'));
+      }
       return state.set('labels', fromJS(action.payload.labels));
     case TOGGLE_PREDICTION:
       return state.setIn(['predictions', action.payload.key, 'show'], action.payload.value);

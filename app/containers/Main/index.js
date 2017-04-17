@@ -27,6 +27,7 @@ import {
   selectModels,
   selectDatafiles,
   selectDatafile,
+  selectDatasize,
 } from './selectors';
 import {
   toggleIndicator,
@@ -79,7 +80,7 @@ display: flex;
 justify-content: space-between;
 padding: 5px 10px;
 font-size: 14px;
-cursor: pointer;
+cursor: ${props => props.deactivated ? 'default' : 'pointer'};
 
 &:hover {
   background-color: ${props => props.active ? 'rgba(0, 151, 167, 0.4)' : 'rgba(255, 255, 255, 0.1)'};
@@ -106,10 +107,13 @@ const listStyle = {
 
 export class Main extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
 
+  isRunning = () => this.props.metropolisStatus !== 'Idle';
+
   render() {
     const models = this.props.models.map((model, index) => 
       <CustomListItem active={this.props.modelName === model} key={index}
-        onClick={() => this.props.setModelName(model)}>
+        deactivated={this.isRunning()}
+        onClick={() => !this.isRunning() && this.props.setModelName(model)}>
         <span>{model}</span>
         <Delete onTouchTap={(evt) => this.props.deleteModel(evt, model)}/>
       </CustomListItem>
@@ -117,7 +121,8 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
 
     const datafiles = this.props.datafiles.map((datafile, index) =>
       <CustomListItem active={this.props.datafile === datafile} key={index}
-        onClick={() => this.props.setDatafile(datafile)}>
+        deactivated={this.isRunning()}
+        onClick={() => !this.isRunning() && this.props.setDatafile(datafile)}>
         <span>{datafile}</span>
       </CustomListItem>
     );
@@ -149,6 +154,7 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                   {models}
                 </List>
                 <TextField floatingLabelText="New model" value={this.props.modelName}
+                  disabled={this.isRunning()}
                   onChange={(evt, newValue) => this.props.setModelName(newValue)}/>
               </Column>
 
@@ -159,13 +165,15 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                 <Row>
                   <Label>Epochs: {this.props.epochs}</Label>
                   <Slider min={1} max={20} step={1} value={this.props.epochs}
+                    disabled={this.isRunning()}
                     style={outerSliderStyle} sliderStyle={sliderStyle}
                     onChange={(evt, newValue) => this.props.setEpochs(newValue)} />
                 </Row>
 
                 <Row>
                   <Label>Offset: {this.props.offset}</Label>
-                  <Slider min={0} max={200} step={1} value={this.props.offset}
+                  <Slider min={0} max={this.props.datasize} step={1} value={this.props.offset}
+                    disabled={this.isRunning()}
                     style={outerSliderStyle} sliderStyle={sliderStyle}
                     onChange={(evt, newValue) => this.props.setOffset(newValue)} />
                 </Row>
@@ -173,13 +181,14 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                 <Row>
                   <Label>Limit: {this.props.limit}</Label>
                   <Slider min={1} max={200} step={1} value={this.props.limit}
+                    disabled={this.isRunning()}
                     style={outerSliderStyle} sliderStyle={sliderStyle}
                     onChange={(evt, newValue) => this.props.setLimit(newValue)} />
                 </Row>
                 <Row>
                   <RaisedButton label="Train" primary={true} 
                     onClick={this.props.startTrain}
-                    disabled={this.props.metropolisStatus === 'Running'}/>
+                    disabled={this.isRunning()}/>
                 </Row>
               </Column>
             </Row>
@@ -210,6 +219,7 @@ Main.propTypes = {
   deleteModel: PropTypes.func.isRequired,
   datafiles: PropTypes.array.isRequired,
   setDatafile: PropTypes.func.isRequired,
+  datasize: PropTypes.number.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -227,6 +237,7 @@ const mapStateToProps = createStructuredSelector({
   models: selectModels(),
   datafiles: selectDatafiles(),
   datafile: selectDatafile(),
+  datasize: selectDatasize(),
 });
 
 function mapDispatchToProps(dispatch) {

@@ -68,6 +68,11 @@ const selectDatafile = () => createSelector(
   (state) => state.get('datafile')
 );
 
+const selectDatasize = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('datasize')
+);
+
 /**
  * Default selector used by Main
  */
@@ -92,4 +97,5 @@ export {
   selectModels,
   selectDatafiles,
   selectDatafile,
+  selectDatasize,
 };

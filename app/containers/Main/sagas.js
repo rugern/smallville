@@ -1,5 +1,5 @@
-import { take, takeEvery, call, put, select, cancel, takeLatest, apply } from 'redux-saga/effects';
-import { eventChannel } from 'redux-saga'
+import { take, takeEvery, call, put, select, takeLatest, apply, throttle } from 'redux-saga/effects';
+import { eventChannel, buffers } from 'redux-saga'
 import io from 'socket.io-client';
 
 import {
@@ -48,7 +48,7 @@ function createChannel(socket, eventName) {
 export function* takeConnectChannel(socket) {
   const connectionChannel = yield call(createChannel, socket, 'connect');
   while (true) {
-    const payload = yield take(connectionChannel);
+    const payload = yield take(connectionChannel, buffers.sliding(5));
     yield put(setConnectionStatus(payload));
     yield put(getMetropolisStatus());
     yield put(getData());
@@ -60,7 +60,7 @@ export function* takeConnectChannel(socket) {
 export function* takeDisconnectChannel(socket) {
   const connectionChannel = yield call(createChannel, socket, 'disconnect');
   while (true) {
-    const payload = yield take(connectionChannel);
+    const payload = yield take(connectionChannel, buffers.sliding(5));
     yield put(setConnectionStatus(payload));
   }
 }
@@ -68,7 +68,7 @@ export function* takeDisconnectChannel(socket) {
 export function* takeDataChannel(socket) {
   const dataChannel = yield call(createChannel, socket, SET_DATA);
   while (true) {
-    const payload = yield take(dataChannel);
+    const payload = yield take(dataChannel, buffers.sliding(5));
     yield put(setData(payload));
   }
 }
@@ -80,22 +80,23 @@ function* emitGetData(socket) {
 }
 
 export function* takeGetData(socket) {
-  yield takeLatest(GET_DATA, emitGetData, socket);
+  yield throttle(200, GET_DATA, emitGetData, socket);
 }
 
 export function* takeSetOffset(socket) {
-  yield takeLatest(SET_OFFSET, emitGetData, socket);
+  yield throttle(200, SET_OFFSET, emitGetData, socket);
 }
 
 export function* takeSetLimit(socket) {
-  yield takeLatest(SET_LIMIT, emitGetData, socket);
+  yield throttle(200, SET_LIMIT, emitGetData, socket);
 }
 
 export function* takeStatusChannel(socket, action) {
   const statusChannel = yield call(createChannel, socket, SET_METROPOLIS_STATUS);
   while (true) {
-    const payload = yield take(statusChannel);
+    const payload = yield take(statusChannel, buffers.sliding(5));
     yield put(setMetropolisStatus(payload));
+    console.log(payload);
     if (payload === 'Idle') {
       yield call(emitGetData, socket);
     }
@@ -113,7 +114,6 @@ export function* emitStartTrain(socket) {
   while (true) {
     const action = yield take(START_TRAIN);
     yield apply(socket, socket.emit, [action.type]);
-    yield put(setMetropolisStatus('Running'));
   }
 }
 
