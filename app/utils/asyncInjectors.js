@@ -48,7 +48,7 @@ export function injectAsyncReducer(store, isValid) {
  * Inject an asynchronously loaded saga
  */
 export function injectAsyncSagas(store, isValid) {
-  return function injectSagas(sagas) {
+  return function injectSagas(sagas, sharedDependencies) {
     if (!isValid) checkStore(store);
 
     invariant(
@@ -61,7 +61,7 @@ export function injectAsyncSagas(store, isValid) {
       '(app/utils...) injectAsyncSagas: Received an empty `sagas` array'
     );
 
-    sagas.map(store.runSaga);
+    sagas.map(saga => store.runSaga(saga, sharedDependencies));
   };
 }
 

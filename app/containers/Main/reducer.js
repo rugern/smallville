@@ -16,6 +16,8 @@ import {
   SET_OFFSET,
   SET_LIMIT,
   SET_DATAFILE,
+  SET_INFO,
+  CLEAR_INFO,
 } from './constants';
 
 const initialState = fromJS({
@@ -31,6 +33,7 @@ const initialState = fromJS({
   models: [],
   datafiles: [],
   datasize: 1,
+  info: [],
 });
 
 function randomInt(min, max) {
@@ -91,6 +94,10 @@ function mainReducer(state = initialState, action) {
       return state.set('offset', action.payload);
     case SET_LIMIT:
       return state.set('limit', action.payload);
+    case SET_INFO:
+      return state.updateIn(['info'], info => info.push(action.payload));
+    case CLEAR_INFO:
+      return state.set('info', fromJS([]));
     default:
       return state;
   }

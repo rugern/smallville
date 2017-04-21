@@ -46,7 +46,6 @@ export default function createReducer(asyncReducers) {
     route: routeReducer,
     language: languageProviderReducer,
     sidebar: sidebarReducer,
-    //websocket: websocketReducer,
     ...asyncReducers,
   });
 }

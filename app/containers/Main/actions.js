@@ -20,6 +20,8 @@ import {
   SET_LIMIT,
   DELETE_MODEL,
   SET_DATAFILE,
+  SET_INFO,
+  CLEAR_INFO,
 } from './constants';
 
 export function defaultAction() {
@@ -120,5 +122,18 @@ export function setDatafile(payload) {
   return {
     type: SET_DATAFILE,
     payload,
+  };
+}
+
+export function setInfo(payload) {
+  return {
+    type: SET_INFO,
+    payload,
+  };
+}
+
+export function clearInfo() {
+  return {
+    type: CLEAR_INFO,
   };
 }

@@ -8,6 +8,7 @@ import TextField from 'material-ui/TextField';
 import Slider from 'material-ui/Slider';
 import {List, ListItem} from 'material-ui/List';
 import Delete from 'material-ui/svg-icons/action/delete';
+import Paper from 'material-ui/Paper';
 
 import ControlPanel from '../../components/ControlPanel';
 import Chart from '../../components/Chart';
@@ -28,6 +29,7 @@ import {
   selectDatafiles,
   selectDatafile,
   selectDatasize,
+  selectInfo,
 } from './selectors';
 import {
   toggleIndicator,
@@ -87,6 +89,16 @@ cursor: ${props => props.deactivated ? 'default' : 'pointer'};
 }
 `;
 
+const Message = styled.div`
+font-size: 12px;
+`;
+
+const infoStyle = {
+  overflow: 'scroll',
+  width: '500px',
+  height: '200px',
+};
+
 const outerSliderStyle = {
   width: 'calc(100% - 100px)',
 };
@@ -107,7 +119,7 @@ const listStyle = {
 
 export class Main extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
 
-  isRunning = () => this.props.metropolisStatus !== 'Idle';
+  isRunning = () => this.props.metropolisStatus !== 'Idle' || this.props.connectionStatus !== 'connect';
 
   render() {
     const models = this.props.models.map((model, index) => 
@@ -125,6 +137,10 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
         onClick={() => !this.isRunning() && this.props.setDatafile(datafile)}>
         <span>{datafile}</span>
       </CustomListItem>
+    );
+
+    const info = this.props.info.reverse().map((entry, index) =>
+        <Message key={index}>{entry}</Message>
     );
 
     return (
@@ -192,6 +208,12 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                 </Row>
               </Column>
             </Row>
+
+            <Row>
+              <Paper style={infoStyle}>
+                {info}
+              </Paper>
+            </Row>
           </ControlPanel>
 
           <Chart indicators={this.props.indicators}
@@ -220,6 +242,7 @@ Main.propTypes = {
   datafiles: PropTypes.array.isRequired,
   setDatafile: PropTypes.func.isRequired,
   datasize: PropTypes.number.isRequired,
+  info: PropTypes.array.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -238,6 +261,7 @@ const mapStateToProps = createStructuredSelector({
   datafiles: selectDatafiles(),
   datafile: selectDatafile(),
   datasize: selectDatasize(),
+  info: selectInfo(),
 });
 
 function mapDispatchToProps(dispatch) {

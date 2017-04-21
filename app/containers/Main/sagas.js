@@ -1,6 +1,5 @@
 import { take, takeEvery, call, put, select, takeLatest, apply, throttle } from 'redux-saga/effects';
 import { eventChannel, buffers } from 'redux-saga'
-import io from 'socket.io-client';
 
 import {
   setConnectionStatus,
@@ -8,6 +7,8 @@ import {
   setData,
   getData,
   getMetropolisStatus,
+  setInfo,
+  clearInfo,
 } from './actions';
 import {
   SET_DATA,
@@ -21,6 +22,7 @@ import {
   SET_EPOCHS,
   DELETE_MODEL,
   SET_DATAFILE,
+  ADD_METROPOLIS_INFO,
 } from './constants';
 import {
   selectOffset,
@@ -46,6 +48,13 @@ function createChannel(socket, eventName) {
 }
 
 export function* takeConnectChannel(socket) {
+  if (socket.connected) {
+    yield put(setConnectionStatus('connect'));
+    yield put(getMetropolisStatus());
+    yield put(getData());
+    const modelName = yield(select(selectModelName()));
+    yield apply(socket, socket.emit, [SET_MODEL_NAME, modelName]);
+  }
   const connectionChannel = yield call(createChannel, socket, 'connect');
   while (true) {
     const payload = yield take(connectionChannel, buffers.sliding(5));
@@ -96,7 +105,6 @@ export function* takeStatusChannel(socket, action) {
   while (true) {
     const payload = yield take(statusChannel, buffers.sliding(5));
     yield put(setMetropolisStatus(payload));
-    console.log(payload);
     if (payload === 'Idle') {
       yield call(emitGetData, socket);
     }
@@ -113,6 +121,7 @@ export function* takeStatus(socket) {
 export function* emitStartTrain(socket) {
   while (true) {
     const action = yield take(START_TRAIN);
+    yield put(clearInfo());
     yield apply(socket, socket.emit, [action.type]);
   }
 }
@@ -146,8 +155,15 @@ export function* emitSetDatafile(socket) {
   }
 }
 
-export function* receiveWebsocketData() {
-  const socket = yield call(() => io.connect('http://localhost:5000'));
+export function* takeInfoChannel(socket) {
+  const infoChannel = yield call(createChannel, socket, ADD_METROPOLIS_INFO);
+  while (true) {
+    const payload = yield take(infoChannel, buffers.sliding(10));
+    yield put(setInfo(payload));
+  }
+}
+
+export function* receiveWebsocketData(socket) {
   yield [
     call(takeConnectChannel, socket),
     call(takeDisconnectChannel, socket),
@@ -162,6 +178,7 @@ export function* receiveWebsocketData() {
     call(takeSetLimit, socket),
     call(emitDeleteModel, socket),
     call(emitSetDatafile, socket),
+    call(takeInfoChannel, socket),
   ];
 }
 

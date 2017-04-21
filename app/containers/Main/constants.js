@@ -19,3 +19,6 @@ export const SET_OFFSET = 'set_offset';
 export const SET_LIMIT = 'set_limit';
 export const DELETE_MODEL = 'delete_model';
 export const SET_DATAFILE = 'set_datafile';
+export const ADD_METROPOLIS_INFO = 'add_metropolis_info';
+export const SET_INFO = 'set_info';
+export const CLEAR_INFO = 'clear_info';
