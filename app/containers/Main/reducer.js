@@ -1,39 +1,21 @@
-/*
- *
- * Main reducer
- *
- */
-
 import { fromJS } from 'immutable';
 import {
-  SET_CONNECTION_STATUS,
   SET_DATA,
   TOGGLE_PREDICTION,
   TOGGLE_INDICATOR,
-  SET_METROPOLIS_STATUS,
-  SET_MODEL_NAME,
   SET_EPOCHS,
   SET_OFFSET,
   SET_LIMIT,
-  SET_DATAFILE,
-  SET_INFO,
-  CLEAR_INFO,
 } from './constants';
 
 const initialState = fromJS({
-  connectionStatus: 'disconnect',
-  metropolisStatus: 'Idle',
   predictions: {},
   indicators: {},
   labels: [],
-  modelName: 'Test',
   epochs: 1,
   offset: 0,
   limit: 200,
-  models: [],
-  datafiles: [],
   datasize: 1,
-  info: [],
 });
 
 function randomInt(min, max) {
@@ -57,10 +39,6 @@ function mapColor(data) {
 
 function mainReducer(state = initialState, action) {
   switch (action.type) {
-    case SET_CONNECTION_STATUS:
-      return state.set('connectionStatus', action.payload);
-    case SET_METROPOLIS_STATUS:
-      return state.set('metropolisStatus', action.payload);
     case SET_DATA:
       const indicators = mapColor(action.payload.indicators);
       const indicatorKeys = Object.keys(indicators);
@@ -74,9 +52,6 @@ function mainReducer(state = initialState, action) {
         .mergeDeep(predictions)
         .filter((value, key) => predictionKeys.indexOf(key) !== -1)
       );
-      state = state.set('models', fromJS(action.payload.models));
-      state = state.set('datafiles', fromJS(action.payload.datafiles));
-      state = state.set('datafile', action.payload.datafile);
       state = state.set('datasize', Math.max(1, action.payload.datasize)); // Avoid slider error
       if (state.get('offset') > state.get('datasize')) {
         state = state.set('offset', state.get('datasize'));
@@ -86,18 +61,12 @@ function mainReducer(state = initialState, action) {
       return state.setIn(['predictions', action.payload.key, 'show'], action.payload.value);
     case TOGGLE_INDICATOR:
       return state.setIn(['indicators', action.payload.key, 'show'], action.payload.value);
-    case SET_MODEL_NAME:
-      return state.set('modelName', action.payload);
     case SET_EPOCHS:
       return state.set('epochs', action.payload);
     case SET_OFFSET:
       return state.set('offset', action.payload);
     case SET_LIMIT:
       return state.set('limit', action.payload);
-    case SET_INFO:
-      return state.updateIn(['info'], info => info.push(action.payload));
-    case CLEAR_INFO:
-      return state.set('info', fromJS([]));
     default:
       return state;
   }

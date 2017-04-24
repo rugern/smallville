@@ -13,47 +13,51 @@ import Paper from 'material-ui/Paper';
 import ControlPanel from '../../components/ControlPanel';
 import Chart from '../../components/Chart';
 import PlotList from '../../components/PlotList';
-import Sidebar from '../Sidebar';
 import makeSelectMain from './selectors';
 import {
   selectPredictions,
   selectIndicators,
   selectLabels,
-  selectConnectionStatus,
-  selectMetropolisStatus,
-  selectModelName,
   selectEpochs,
   selectOffset,
   selectLimit,
-  selectModels,
-  selectDatafiles,
-  selectDatafile,
   selectDatasize,
-  selectInfo,
 } from './selectors';
 import {
   toggleIndicator,
   togglePrediction,
   startTrain,
-  setModelName,
   setEpochs,
   setOffset,
   setLimit,
   deleteModel,
-  setDatafile,
 } from './actions';
+import {
+  selectConnectionStatus,
+  selectMetropolisStatus,
+  selectModels,
+  selectDatafiles,
+  selectDatafile,
+  selectInfo,
+  selectModelName,
+} from '../App/selectors';
+import {
+  setModelName,
+  setDatafile,
+} from '../App/actions';
 import {
   selectSidebarOpen,
 } from '../Sidebar/selectors';
 
 const Info = styled.h5`
+margin: 0;
+padding: 0;
 text-align: ${props => props.center ? 'center' : 'left'};
 `;
 
 const Body = styled.div`
-max-width: 80%;
-padding: 20px;
-margin: ${props => props.sidebarOpen ? '0 auto 0 256px' : '0 auto'};
+width: 100%;
+margin: 0 auto;
 `;
 
 const Row = styled.div`
@@ -61,14 +65,23 @@ display: flex;
 flex-direction: row;
 width: 100%;
 margin: 0;
-padding: 10px;
+padding: 0;
+`;
+
+const StyledColumn = styled(Paper)`
+display: flex;
+flex-direction: column;
+padding: 20px;
+margin: 10px;
+width: calc(100% * ${props => props.width ? props.width / 12 : 1});
+height: ${props => props.height || 'initial'};
+overflow-x: scroll;
 `;
 
 const Column = styled.div`
 display: flex;
 flex-direction: column;
-padding: 20px;
-width: calc(100% * ${props => props.width / 12});
+width: calc(100% * ${props => props.width ? props.width / 12 : 1});
 `;
 
 const Label = styled.h5`
@@ -94,9 +107,10 @@ font-size: 12px;
 `;
 
 const infoStyle = {
+  boxShadow: 'none',
   overflow: 'scroll',
-  width: '500px',
-  height: '200px',
+  height: '300px',
+  border: '1px solid white',
 };
 
 const outerSliderStyle = {
@@ -115,6 +129,10 @@ const itemStyle = {
 
 const listStyle = {
   border: '1px solid white',
+  margin: '0 0 20px 0',
+};
+
+const textFieldStyle = {
 };
 
 export class Main extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -140,43 +158,59 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
     );
 
     const info = this.props.info.reverse().map((entry, index) =>
-        <Message key={index}>{entry}</Message>
+      <Message key={index}>{entry}</Message>
     );
 
     return (
-      <div>
-        <Sidebar connectionStatus={this.props.connectionStatus}
-          indicators={this.props.indicators}>
-          <Info center>Connection status: {this.props.connectionStatus}</Info>
-          <Divider />
-          <PlotList header="Indicators" items={this.props.indicators}
-            toggleItem={this.props.toggleIndicator}/>
-          <Divider />
-          <PlotList header="Predictions" items={this.props.predictions}
-            toggleItem={this.props.togglePrediction}/>
-        </Sidebar>
+      <Body sidebarOpen={this.props.sidebarOpen}>
+        <Row>
+          <StyledColumn width={3}>
+            <PlotList header="Indicators" items={this.props.indicators}
+              toggleItem={this.props.toggleIndicator}/>
+            <Divider />
+            <PlotList header="Predictions" items={this.props.predictions}
+              toggleItem={this.props.togglePrediction}/>
+          </StyledColumn>
 
-        <Body sidebarOpen={this.props.sidebarOpen}>
-          <ControlPanel>
+          <Column width={9}>
             <Row>
-              <Column width={3}>
-                <List style={listStyle}>
-                  {datafiles}
-                </List>
-              </Column>
-
-              <Column width={3}>
-                <List style={listStyle}>
-                  {models}
-                </List>
-                <TextField floatingLabelText="New model" value={this.props.modelName}
-                  disabled={this.isRunning()}
-                  onChange={(evt, newValue) => this.props.setModelName(newValue)}/>
-              </Column>
-
-              <Column width={6}>
+              <Column width={4}>
                 <Row>
-                  <Info>Metropolis status: {this.props.metropolisStatus}</Info>
+                  <StyledColumn>
+                    <List style={listStyle}>
+                      {datafiles}
+                    </List>
+                  </StyledColumn>
+                </Row>
+
+                <Row>
+                  <StyledColumn>
+                    <List style={listStyle}>
+                      {models}
+                    </List>
+
+                    <TextField floatingLabelText="New model" value={this.props.modelName}
+                      disabled={this.isRunning()} style={textFieldStyle}
+                      onChange={(evt, newValue) => this.props.setModelName(newValue)}/>
+                  </StyledColumn>
+                </Row>
+              </Column>
+
+              <StyledColumn width={8} height="450px">
+                {info}
+              </StyledColumn>
+            </Row>
+
+            <Row>
+              <StyledColumn>
+                <Row>
+                  <Column width={6}>
+                    <Info>Connection status: {this.props.connectionStatus}</Info>
+                  </Column>
+
+                  <Column width={6}>
+                    <Info>Metropolis status: {this.props.metropolisStatus}</Info>
+                  </Column>
                 </Row>
                 <Row>
                   <Label>Epochs: {this.props.epochs}</Label>
@@ -206,20 +240,15 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                     onClick={this.props.startTrain}
                     disabled={this.isRunning()}/>
                 </Row>
-              </Column>
+              </StyledColumn>
             </Row>
-
-            <Row>
-              <Paper style={infoStyle}>
-                {info}
-              </Paper>
-            </Row>
-          </ControlPanel>
-
+          </Column>
+        </Row>
+        <Row>
           <Chart indicators={this.props.indicators}
             predictions={this.props.predictions} labels={this.props.labels} />
+        </Row>
       </Body>
-      </div>
     );
   }
 }

@@ -1,76 +1,52 @@
 import { take, takeEvery, call, put, select, takeLatest, apply, throttle } from 'redux-saga/effects';
-import { eventChannel, buffers } from 'redux-saga'
+import { buffers } from 'redux-saga'
 
+import { createChannel } from '../../utils/sagaUtils';
 import {
-  setConnectionStatus,
-  setMetropolisStatus,
   setData,
   getData,
-  getMetropolisStatus,
-  setInfo,
-  clearInfo,
 } from './actions';
+import {
+  clearInfo,
+} from '../App/actions';
 import {
   SET_DATA,
   GET_DATA,
   SET_OFFSET,
   SET_LIMIT,
-  SET_METROPOLIS_STATUS,
-  GET_METROPOLIS_STATUS,
   START_TRAIN,
-  SET_MODEL_NAME,
   SET_EPOCHS,
   DELETE_MODEL,
-  SET_DATAFILE,
-  ADD_METROPOLIS_INFO,
+  DATAFILE_CHANGED,
 } from './constants';
 import {
   selectOffset,
   selectLimit,
-  selectModelName,
+  selectEpochs,
 } from './selectors';
+import {
+  SET_CONNECTION_STATUS,
+  SET_METROPOLIS_STATUS,
+  GET_MODELS,
+} from '../App/constants';
+import appSagas from '../App/sagas';
 
-
-function createChannel(socket, eventName) {
-  return eventChannel((emit) => {
-    const handler = (data) => {
-      const payload = data ? data : eventName;
-      emit(payload);
-    };
-
-    const unsubscribe = () => {
-      socket.off(eventName);
-    };
-
-    socket.on(eventName, handler);
-    return unsubscribe;
-  });
-}
-
-export function* takeConnectChannel(socket) {
-  if (socket.connected) {
-    yield put(setConnectionStatus('connect'));
-    yield put(getMetropolisStatus());
-    yield put(getData());
-    const modelName = yield(select(selectModelName()));
-    yield apply(socket, socket.emit, [SET_MODEL_NAME, modelName]);
-  }
-  const connectionChannel = yield call(createChannel, socket, 'connect');
+export function* takeConnectionStatus(socket) {
   while (true) {
-    const payload = yield take(connectionChannel, buffers.sliding(5));
-    yield put(setConnectionStatus(payload));
-    yield put(getMetropolisStatus());
+    const action = yield take(SET_CONNECTION_STATUS);
     yield put(getData());
-    const modelName = yield(select(selectModelName()));
-    yield apply(socket, socket.emit, [SET_MODEL_NAME, modelName]);
+    const epochs = yield(select(selectEpochs()));
+    yield apply(socket, socket.emit, [SET_EPOCHS, epochs]);
   }
 }
 
-export function* takeDisconnectChannel(socket) {
-  const connectionChannel = yield call(createChannel, socket, 'disconnect');
+export function* takeMetropolisStatus(socket) {
   while (true) {
-    const payload = yield take(connectionChannel, buffers.sliding(5));
-    yield put(setConnectionStatus(payload));
+    const action = yield take(SET_METROPOLIS_STATUS);
+    if (action.payload === 'Idle') {
+      yield call(emitGetData, socket);
+      yield apply(socket, socket.emit, [GET_MODELS]);
+    }
   }
 }
 
@@ -100,36 +76,11 @@ export function* takeSetLimit(socket) {
   yield throttle(200, SET_LIMIT, emitGetData, socket);
 }
 
-export function* takeStatusChannel(socket, action) {
-  const statusChannel = yield call(createChannel, socket, SET_METROPOLIS_STATUS);
-  while (true) {
-    const payload = yield take(statusChannel, buffers.sliding(5));
-    yield put(setMetropolisStatus(payload));
-    if (payload === 'Idle') {
-      yield call(emitGetData, socket);
-    }
-  }
-}
-
-export function* takeStatus(socket) {
-  while (true) {
-    const action = yield take(GET_METROPOLIS_STATUS);
-    yield apply(socket, socket.emit, [action.type]);
-  }
-}
-
 export function* emitStartTrain(socket) {
   while (true) {
     const action = yield take(START_TRAIN);
     yield put(clearInfo());
     yield apply(socket, socket.emit, [action.type]);
-  }
-}
-
-export function* emitModelName(socket) {
-  while (true) {
-    const action = yield take(SET_MODEL_NAME);
-    yield apply(socket, socket.emit, [action.type, action.payload]);
   }
 }
 
@@ -143,45 +94,35 @@ export function* emitEpochs(socket) {
 export function* emitDeleteModel(socket) {
   while (true) {
     const action = yield take(DELETE_MODEL);
+    console.log(action);
     yield apply(socket, socket.emit, [action.type, action.payload]);
   }
 }
 
-export function* emitSetDatafile(socket) {
+export function* datafileChangedChannel(socket) {
+  const changedChannel = yield call(createChannel, socket, DATAFILE_CHANGED);
   while (true) {
-    const action = yield take(SET_DATAFILE);
-    yield apply(socket, socket.emit, [action.type, action.payload]);
+    const payload = yield take(changedChannel, buffers.sliding(5));
     yield call(emitGetData, socket);
-  }
-}
-
-export function* takeInfoChannel(socket) {
-  const infoChannel = yield call(createChannel, socket, ADD_METROPOLIS_INFO);
-  while (true) {
-    const payload = yield take(infoChannel, buffers.sliding(10));
-    yield put(setInfo(payload));
   }
 }
 
 export function* receiveWebsocketData(socket) {
   yield [
-    call(takeConnectChannel, socket),
-    call(takeDisconnectChannel, socket),
+    call(takeConnectionStatus, socket),
     call(takeDataChannel, socket),
     call(emitGetData, socket),
-    call(takeStatus, socket),
-    call(takeStatusChannel, socket),
     call(emitStartTrain, socket),
-    call(emitModelName, socket),
     call(emitEpochs, socket),
     call(takeSetOffset, socket),
     call(takeSetLimit, socket),
     call(emitDeleteModel, socket),
-    call(emitSetDatafile, socket),
-    call(takeInfoChannel, socket),
+    call(datafileChangedChannel, socket),
+    call(takeMetropolisStatus, socket),
   ];
 }
 
 export default [
   receiveWebsocketData,
+  ...appSagas,
 ];

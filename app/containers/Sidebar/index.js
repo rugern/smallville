@@ -20,8 +20,10 @@ import {
 
 function Sidebar(props) {
   return (
-    <Drawer open={props.sidebarOpen}>
-      <MenuItem primaryText="Close" onClick={props.toggleSidebar} rightIcon={<ContentClear />} />
+    <Drawer docked={false} open={props.sidebarOpen}
+      onRequestChange={props.toggleSidebar} >
+      <MenuItem primaryText="Close" onClick={props.toggleSidebar}
+        rightIcon={<ContentClear />} />
       {props.children}
     </Drawer>
   );

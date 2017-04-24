@@ -10,3 +10,16 @@
  */
 
 export const DEFAULT_LOCALE = 'en';
+export const GET_MODELS = 'get_models';
+export const SET_CONNECTION_STATUS = 'set_connection_status';
+export const SET_METROPOLIS_STATUS = 'set_metropolis_status';
+export const GET_METROPOLIS_STATUS = 'get_metropolis_status';
+export const SET_MODEL_NAME = 'set_model_name';
+export const SET_DATAFILE = 'set_datafile';
+export const ADD_METROPOLIS_INFO = 'add_metropolis_info';
+export const SET_INFO = 'set_info';
+export const CLEAR_INFO = 'clear_info';
+export const SET_MODELS = 'set_models';
+export const SET_DATAFILES = 'set_datafiles';
+export const GET_DATAFILES = 'get_datafiles';
+export const GET_DATAFILE = 'get_datafile';

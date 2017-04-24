@@ -8,10 +8,6 @@ const selectMainDomain = () => (state) => state.get('main');
 /**
  * Other specific selectors
  */
-const selectConnectionStatus = () => createSelector(
-  selectMainDomain(),
-  (state) => state.get('connectionStatus')
-);
 
 const selectPredictions = () => createSelector(
   selectMainDomain(),
@@ -26,16 +22,6 @@ const selectIndicators = () => createSelector(
 const selectLabels = () => createSelector(
   selectMainDomain(),
   (state) => state.get('labels').toJS()
-);
-
-const selectMetropolisStatus = () => createSelector(
-  selectMainDomain(),
-  (state) => state.get('metropolisStatus')
-);
-
-const selectModelName = () => createSelector(
-  selectMainDomain(),
-  (state) => state.get('modelName')
 );
 
 const selectEpochs = () => createSelector(
@@ -53,29 +39,9 @@ const selectLimit = () => createSelector(
   (state) => state.get('limit')
 );
 
-const selectModels = () => createSelector(
-  selectMainDomain(),
-  (state) => state.get('models').toJS()
-);
-
-const selectDatafiles = () => createSelector(
-  selectMainDomain(),
-  (state) => state.get('datafiles').toJS()
-);
-
-const selectDatafile = () => createSelector(
-  selectMainDomain(),
-  (state) => state.get('datafile')
-);
-
 const selectDatasize = () => createSelector(
   selectMainDomain(),
   (state) => state.get('datasize')
-);
-
-const selectInfo = () => createSelector(
-  selectMainDomain(),
-  (state) => state.get('info').toJS()
 );
 
 /**
@@ -90,18 +56,11 @@ const makeSelectMain = () => createSelector(
 export default makeSelectMain;
 export {
   selectMainDomain,
-  selectConnectionStatus,
   selectIndicators,
   selectPredictions,
   selectLabels,
-  selectMetropolisStatus,
-  selectModelName,
   selectEpochs,
   selectOffset,
   selectLimit,
-  selectModels,
-  selectDatafiles,
-  selectDatafile,
   selectDatasize,
-  selectInfo,
 };
