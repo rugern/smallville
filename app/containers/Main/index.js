@@ -22,6 +22,8 @@ import {
   selectOffset,
   selectLimit,
   selectDatasize,
+  selectMax,
+  selectMin,
 } from './selectors';
 import {
   toggleIndicator,
@@ -157,7 +159,7 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
       </CustomListItem>
     );
 
-    const info = this.props.info.reverse().map((entry, index) =>
+    const info = this.props.info.slice().reverse().map((entry, index) =>
       <Message key={index}>{entry}</Message>
     );
 
@@ -245,7 +247,8 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
           </Column>
         </Row>
         <Row>
-          <Chart indicators={this.props.indicators}
+          <Chart indicators={this.props.indicators} min={this.props.minValue}
+            max={this.props.maxValue}
             predictions={this.props.predictions} labels={this.props.labels} />
         </Row>
       </Body>
@@ -272,6 +275,8 @@ Main.propTypes = {
   setDatafile: PropTypes.func.isRequired,
   datasize: PropTypes.number.isRequired,
   info: PropTypes.array.isRequired,
+  minValue: PropTypes.number.isRequired,
+  maxValue: PropTypes.number.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -291,6 +296,8 @@ const mapStateToProps = createStructuredSelector({
   datafile: selectDatafile(),
   datasize: selectDatasize(),
   info: selectInfo(),
+  maxValue: selectMax(),
+  minValue: selectMin(),
 });
 
 function mapDispatchToProps(dispatch) {

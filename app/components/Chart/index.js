@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import {Line} from 'react-chartjs-2';
 import styled from 'styled-components';
 
-const defaultOptions = {
+const datasetOptions = {
   fill: false,
   lineTension: 0.1,
   borderCapStyle: 'butt',
@@ -16,6 +16,19 @@ const defaultOptions = {
   pointHitRadius: 10,
 };
 
+function createChartOptions(min, max) {
+  return {
+    scales: {
+      yAxes: [{
+        ticks: {
+          min,
+          max,
+        },
+      }],
+    },
+  };
+}
+
 function constructPlots(plotDatas) {
   const rgbaConstructor = (r, g, b) => (a=1) => `rgba(${r},${g},${b},${a})`;
 
@@ -27,7 +40,7 @@ function constructPlots(plotDatas) {
 
     const {r, g, b} = plotData;
     const color = rgbaConstructor(r, g, b);
-    const dataset = Object.assign({}, defaultOptions, {
+    const dataset = Object.assign({}, datasetOptions, {
       data: plotData.data, 
       label: key,
       pointBorderColor: color(),
@@ -46,11 +59,12 @@ function constructPlots(plotDatas) {
 function Chart(props) {
   const datasets = constructPlots(props.indicators)
     .concat(constructPlots(props.predictions));
+  const chartOptions = createChartOptions(props.min, props.max);
 
   return (
-    <Line data={{
+    <Line options={chartOptions} data={{
       labels: props.labels,
-      datasets
+      datasets,
     }} />
   );
 }
@@ -59,6 +73,8 @@ Chart.propTypes = {
   indicators: PropTypes.object.isRequired,
   predictions: PropTypes.object.isRequired,
   labels: PropTypes.array.isRequired,
+  min: PropTypes.number.isRequired,
+  max: PropTypes.number.isRequired,
 };
 
 export default Chart;

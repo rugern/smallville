@@ -16,6 +16,8 @@ const initialState = fromJS({
   offset: 0,
   limit: 200,
   datasize: 1,
+  maxValue: 1,
+  minValue: 0,
 });
 
 function randomInt(min, max) {
@@ -56,6 +58,8 @@ function mainReducer(state = initialState, action) {
       if (state.get('offset') > state.get('datasize')) {
         state = state.set('offset', state.get('datasize'));
       }
+      state = state.set('maxValue', action.payload.maxValue);
+      state = state.set('minValue', action.payload.minValue);
       return state.set('labels', fromJS(action.payload.labels));
     case TOGGLE_PREDICTION:
       return state.setIn(['predictions', action.payload.key, 'show'], action.payload.value);

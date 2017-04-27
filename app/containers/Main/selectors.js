@@ -44,6 +44,16 @@ const selectDatasize = () => createSelector(
   (state) => state.get('datasize')
 );
 
+const selectMax = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('maxValue')
+);
+
+const selectMin = () => createSelector(
+  selectMainDomain(),
+  (state) => state.get('minValue')
+);
+
 /**
  * Default selector used by Main
  */
@@ -63,4 +73,6 @@ export {
   selectOffset,
   selectLimit,
   selectDatasize,
+  selectMax,
+  selectMin,
 };
