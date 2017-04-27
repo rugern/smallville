@@ -8,9 +8,11 @@ import TextField from 'material-ui/TextField';
 import Slider from 'material-ui/Slider';
 import {List, ListItem} from 'material-ui/List';
 import Delete from 'material-ui/svg-icons/action/delete';
-import Paper from 'material-ui/Paper';
 
-import ControlPanel from '../../components/ControlPanel';
+import Column from '../../components/Column';
+import StyledColumn from '../../components/StyledColumn';
+import Row from '../../components/Row';
+import Info from '../../components/Info';
 import Chart from '../../components/Chart';
 import PlotList from '../../components/PlotList';
 import makeSelectMain from './selectors';
@@ -51,39 +53,9 @@ import {
   selectSidebarOpen,
 } from '../Sidebar/selectors';
 
-const Info = styled.h5`
-margin: 0;
-padding: 0;
-text-align: ${props => props.center ? 'center' : 'left'};
-`;
-
 const Body = styled.div`
 width: 100%;
 margin: 0 auto;
-`;
-
-const Row = styled.div`
-display: flex;
-flex-direction: row;
-width: 100%;
-margin: 0;
-padding: 0;
-`;
-
-const StyledColumn = styled(Paper)`
-display: flex;
-flex-direction: column;
-padding: 20px;
-margin: 10px;
-width: calc(100% * ${props => props.width ? props.width / 12 : 1});
-height: ${props => props.height || 'initial'};
-overflow-x: scroll;
-`;
-
-const Column = styled.div`
-display: flex;
-flex-direction: column;
-width: calc(100% * ${props => props.width ? props.width / 12 : 1});
 `;
 
 const Label = styled.h5`
@@ -164,7 +136,7 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
     );
 
     return (
-      <Body sidebarOpen={this.props.sidebarOpen}>
+      <Body>
         <Row>
           <StyledColumn width={3}>
             <PlotList header="Indicators" items={this.props.indicators}
@@ -257,10 +229,11 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
 }
 
 Main.propTypes = {
+  connectionStatus: PropTypes.string.isRequired,
+  metropolisStatus: PropTypes.string.isRequired,
   indicators: PropTypes.object.isRequired,
   predictions: PropTypes.object.isRequired,
   labels: PropTypes.array.isRequired,
-  connectionStatus: PropTypes.string.isRequired,
   toggleIndicator: PropTypes.func.isRequired,
   togglePrediction: PropTypes.func.isRequired,
   startTrain: PropTypes.func.isRequired,

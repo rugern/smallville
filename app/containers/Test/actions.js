@@ -5,11 +5,19 @@
  */
 
 import {
-  DEFAULT_ACTION,
+  START_TEST,
+  SET_TEST_RESULT,
 } from './constants';
 
-export function defaultAction() {
+export function startTest() {
   return {
-    type: DEFAULT_ACTION,
+    type: START_TEST,
+  };
+}
+
+export function setTestResult(payload) {
+  return {
+    type: SET_TEST_RESULT,
+    payload,
   };
 }

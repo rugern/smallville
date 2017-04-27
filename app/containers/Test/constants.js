@@ -4,4 +4,5 @@
  *
  */
 
-export const DEFAULT_ACTION = 'app/Test/DEFAULT_ACTION';
+export const START_TEST = 'start_test';
+export const SET_TEST_RESULT = 'set_test_result';

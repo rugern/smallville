@@ -1,6 +1,7 @@
 import { take, takeEvery, call, put, select, takeLatest, apply, throttle } from 'redux-saga/effects';
 import { buffers } from 'redux-saga'
 
+import appSagas from '../App/sagas';
 import { createChannel } from '../../utils/sagaUtils';
 import {
   setData,
@@ -29,7 +30,6 @@ import {
   SET_METROPOLIS_STATUS,
   GET_MODELS,
 } from '../App/constants';
-import appSagas from '../App/sagas';
 
 export function* takeConnectionStatus(socket) {
   while (true) {
@@ -94,7 +94,6 @@ export function* emitEpochs(socket) {
 export function* emitDeleteModel(socket) {
   while (true) {
     const action = yield take(DELETE_MODEL);
-    console.log(action);
     yield apply(socket, socket.emit, [action.type, action.payload]);
   }
 }
