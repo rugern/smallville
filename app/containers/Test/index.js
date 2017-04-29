@@ -40,43 +40,54 @@ export class Test extends React.PureComponent { // eslint-disable-line react/pre
     return (
       <Body>
         <Row>
-          <StyledColumn>
+          <StyledColumn width={2}>
             <Row>
-              <Column width={6}>
+              <Column>
                 <Info>Connection status: {this.props.connectionStatus}</Info>
               </Column>
+            </Row>
 
-              <Column width={6}>
+            <Row>
+              <Column>
                 <Info>Metropolis status: {this.props.metropolisStatus}</Info>
               </Column>
             </Row>
           </StyledColumn>
-        </Row>
 
-        <Row>
-          <StyledColumn>
+          <StyledColumn width={6}>
             <Row>
-              <Column width={2}>
+              <Column width={6}>
                 <Info>Starting money</Info>
                 <Info>{this.props.startMoney}</Info>
               </Column>
-              <Column width={2}>
+            </Row>
+
+            <Row>
+              <Column width={6}>
                 <Info>Ending money</Info>
                 <Info>{this.props.endMoney}</Info>
               </Column>
-              <Column width={2}>
-                <Info>Stay money</Info>
-                <Info>{this.props.stayMoney}</Info>
-              </Column>
-              <Column width={2}>
+
+              <Column width={6}>
                 <Info>Profit</Info>
                 <Info>{calculateProfit(this.props.endMoney, this.props.startMoney)}%</Info>
               </Column>
-              <Column width={2}>
+            </Row>
+
+            <Row>
+              <Column width={6}>
+                <Info>Stay money</Info>
+                <Info>{this.props.stayMoney}</Info>
+              </Column>
+
+              <Column width={6}>
                 <Info>Relative profit</Info>
                 <Info>{calculateProfit(this.props.endMoney, this.props.stayMoney)}%</Info>
               </Column>
-              <Column width={2}>
+            </Row>
+
+            <Row>
+              <Column width={6}>
                 <RaisedButton label="Test" primary={true}
                   onClick={this.props.startTest} disabled={this.isRunning()}/>
               </Column>
