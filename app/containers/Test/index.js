@@ -5,7 +5,9 @@ import makeSelectTest from './selectors';
 import Paper from 'material-ui/Paper';
 import styled from 'styled-components';
 import RaisedButton from 'material-ui/RaisedButton';
+import {List, ListItem} from 'material-ui/List';
 
+import CustomListItem from '../../components/CustomListItem';
 import Column from '../../components/Column';
 import StyledColumn from '../../components/StyledColumn';
 import Row from '../../components/Row';
@@ -13,11 +15,21 @@ import Info from '../../components/Info';
 import {
   selectConnectionStatus,
   selectMetropolisStatus,
+  selectModels,
+  selectDatafiles,
+  selectDatafile,
+  selectModelName,
 } from '../App/selectors';
+import {
+  setModelName,
+  setDatafile,
+} from '../App/actions';
 import {
   selectStartMoney,
   selectEndMoney,
   selectStayMoney,
+  selectBuys,
+  selectSells,
 } from './selectors';
 import {
   startTest,
@@ -28,6 +40,11 @@ width: 100%;
 margin: 0 auto;
 `;
 
+const listStyle = {
+  border: '1px solid white',
+  margin: '0 0 20px 0',
+};
+
 function calculateProfit(dividend, divisor) {
   return divisor ? Math.round((dividend - divisor) * 1000 / divisor) / 10 : 0;
 }
@@ -37,22 +54,56 @@ export class Test extends React.PureComponent { // eslint-disable-line react/pre
   isRunning = () => this.props.metropolisStatus !== 'Idle' || this.props.connectionStatus !== 'connect';
 
   render() {
+    const models = this.props.models.map((model, index) => 
+      <CustomListItem active={this.props.modelName === model} key={index}
+        deactivated={this.isRunning()}
+        onClick={() => !this.isRunning() && this.props.setModelName(model)}>
+        <span>{model}</span>
+      </CustomListItem>
+    );
+
+    const datafiles = this.props.datafiles.map((datafile, index) =>
+      <CustomListItem active={this.props.datafile === datafile} key={index}
+        deactivated={this.isRunning()}
+        onClick={() => !this.isRunning() && this.props.setDatafile(datafile)}>
+        <span>{datafile}</span>
+      </CustomListItem>
+    );
+
     return (
       <Body>
         <Row>
-          <StyledColumn width={2}>
+          <Column width={2}>
             <Row>
-              <Column>
+              <StyledColumn>
                 <Info>Connection status: {this.props.connectionStatus}</Info>
-              </Column>
+              </StyledColumn>
             </Row>
 
             <Row>
-              <Column>
+              <StyledColumn>
                 <Info>Metropolis status: {this.props.metropolisStatus}</Info>
-              </Column>
+              </StyledColumn>
             </Row>
-          </StyledColumn>
+          </Column>
+
+          <Column width={4}>
+            <Row>
+              <StyledColumn>
+                <List style={listStyle}>
+                  {datafiles}
+                </List>
+              </StyledColumn>
+            </Row>
+
+            <Row>
+              <StyledColumn>
+                <List style={listStyle}>
+                  {models}
+                </List>
+              </StyledColumn>
+            </Row>
+          </Column>
 
           <StyledColumn width={6}>
             <Row>
@@ -88,6 +139,18 @@ export class Test extends React.PureComponent { // eslint-disable-line react/pre
 
             <Row>
               <Column width={6}>
+                <Info>Buys</Info>
+                <Info>{this.props.buys}</Info>
+              </Column>
+
+              <Column width={6}>
+                <Info>Sells</Info>
+                <Info>{this.props.sells}</Info>
+              </Column>
+            </Row>
+
+            <Row>
+              <Column width={6}>
                 <RaisedButton label="Test" primary={true}
                   onClick={this.props.startTest} disabled={this.isRunning()}/>
               </Column>
@@ -105,6 +168,14 @@ Test.propTypes = {
   startMoney: PropTypes.number.isRequired,
   endMoney: PropTypes.number.isRequired,
   stayMoney: PropTypes.number.isRequired,
+  datafiles: PropTypes.array.isRequired,
+  models: PropTypes.array.isRequired,
+  modelName: PropTypes.string.isRequired,
+  setDatafile: PropTypes.func.isRequired,
+  datafile: PropTypes.string.isRequired,
+  setModelName: PropTypes.func.isRequired,
+  buys: PropTypes.number.isRequired,
+  sells: PropTypes.number.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -114,11 +185,19 @@ const mapStateToProps = createStructuredSelector({
   startMoney: selectStartMoney(),
   endMoney: selectEndMoney(),
   stayMoney: selectStayMoney(),
+  models: selectModels(),
+  datafiles: selectDatafiles(),
+  datafile: selectDatafile(),
+  modelName: selectModelName(),
+  buys: selectBuys(),
+  sells: selectSells(),
 });
 
 function mapDispatchToProps(dispatch) {
   return {
     startTest: () => dispatch(startTest()),
+    setModelName: (payload) => dispatch(setModelName(payload)),
+    setDatafile: (payload) => dispatch(setDatafile(payload)),
   };
 }
 

@@ -9,6 +9,7 @@ import Slider from 'material-ui/Slider';
 import {List, ListItem} from 'material-ui/List';
 import Delete from 'material-ui/svg-icons/action/delete';
 
+import CustomListItem from '../../components/CustomListItem';
 import Column from '../../components/Column';
 import StyledColumn from '../../components/StyledColumn';
 import Row from '../../components/Row';
@@ -61,19 +62,6 @@ margin: 0 auto;
 const Label = styled.h5`
 width: 100px;
 margin: 0;
-`;
-
-const CustomListItem = styled.div`
-background-color: ${props => props.active ? 'rgba(0, 151, 167, 0.2)' : 'none'};
-display: flex;
-justify-content: space-between;
-padding: 5px 10px;
-font-size: 14px;
-cursor: ${props => props.deactivated ? 'default' : 'pointer'};
-
-&:hover {
-  background-color: ${props => props.active ? 'rgba(0, 151, 167, 0.4)' : 'rgba(255, 255, 255, 0.1)'};
-}
 `;
 
 const Message = styled.div`
@@ -242,10 +230,12 @@ Main.propTypes = {
   epochs: PropTypes.number.isRequired,
   offset: PropTypes.number.isRequired,
   limit: PropTypes.number.isRequired,
-  models: PropTypes.array.isRequired,
   deleteModel: PropTypes.func.isRequired,
   datafiles: PropTypes.array.isRequired,
+  datafile: PropTypes.string.isRequired,
+  models: PropTypes.array.isRequired,
   setDatafile: PropTypes.func.isRequired,
+  setModelName: PropTypes.func.isRequired,
   datasize: PropTypes.number.isRequired,
   info: PropTypes.array.isRequired,
   minValue: PropTypes.number.isRequired,

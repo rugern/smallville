@@ -24,6 +24,16 @@ const selectStayMoney = () => createSelector(
   (state) => state.get('stayMoney')
 );
 
+const selectBuys = () => createSelector(
+  selectTestDomain(),
+  (state) => state.get('buys')
+);
+
+const selectSells = () => createSelector(
+  selectTestDomain(),
+  (state) => state.get('sells')
+);
+
 /**
  * Default selector used by Test
  */
@@ -39,4 +49,6 @@ export {
   selectStartMoney,
   selectEndMoney,
   selectStayMoney,
+  selectBuys,
+  selectSells,
 };
