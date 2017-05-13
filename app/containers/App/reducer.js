@@ -2,7 +2,7 @@ import { fromJS } from 'immutable';
 
 import {
   SET_MODELS,
-  SET_MODEL_NAME,
+  SET_MODEL,
   SET_CONNECTION_STATUS,
   SET_METROPOLIS_STATUS,
   SET_DATAFILE,
@@ -15,7 +15,7 @@ const initialState = fromJS({
   connectionStatus: 'disconnect',
   metropolisStatus: 'Idle',
   models: [],
-  modelName: 'Test',
+  model: '',
   info: [],
   datafiles: [],
   datafile: '',
@@ -27,10 +27,10 @@ function appReducer(state = initialState, action) {
       return state.set('connectionStatus', action.payload);
     case SET_METROPOLIS_STATUS:
       return state.set('metropolisStatus', action.payload);
-    case SET_MODEL_NAME:
-      return state.set('modelName', action.payload);
+    case SET_MODEL:
+      return state.set('model', action.payload);
     case SET_INFO:
-      return state.updateIn(['info'], info => info.push(action.payload));
+      return state.updateIn(['info'], (info) => info.push(action.payload));
     case CLEAR_INFO:
       return state.set('info', fromJS([]));
     case SET_MODELS:

@@ -4,8 +4,8 @@
 *
 */
 
-import React, {PropTypes} from 'react';
-import {List, ListItem} from 'material-ui/List';
+import React, { PropTypes } from 'react';
+import { List, ListItem } from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
 import Toggle from 'material-ui/Toggle';
 
@@ -17,9 +17,13 @@ const itemStyle = {
 
 function PlotList(props) {
   const items = Object.keys(props.items).map((key, index) =>
-    <ListItem primaryText={key} key={index} innerDivStyle={itemStyle} rightToggle={
-      <Toggle onToggle={(evt, value) => props.toggleItem({key, value})}/>
-    } />
+    <ListItem
+      primaryText={key} key={index} innerDivStyle={itemStyle} rightToggle={
+        <Toggle
+          onToggle={(evt, value) => props.toggleItem({ key, value })}
+        />
+      }
+    />
   );
 
   return (
@@ -33,7 +37,6 @@ function PlotList(props) {
 PlotList.propTypes = {
   items: PropTypes.object.isRequired,
   header: PropTypes.string.isRequired,
-  toggleItem: PropTypes.func.isRequired,
 };
 
 export default PlotList;

@@ -36,9 +36,9 @@ const selectMetropolisStatus = () => createSelector(
   (state) => state.get('metropolisStatus')
 );
 
-const selectModelName = () => createSelector(
+const selectModel = () => createSelector(
   selectAppDomain(),
-  (state) => state.get('modelName')
+  (state) => state.get('model')
 );
 
 const selectModels = () => createSelector(
@@ -65,7 +65,7 @@ export {
   makeSelectLocationState,
   selectConnectionStatus,
   selectMetropolisStatus,
-  selectModelName,
+  selectModel,
   selectModels,
   selectDatafiles,
   selectDatafile,

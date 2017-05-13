@@ -33,34 +33,37 @@ function color() {
 }
 
 function mapColor(data) {
-  return Object.keys(data).reduce((result, key) => {
-    result[key] = Object.assign({}, data[key], color());;
-    return result;
-  }, {});
+  return Object.keys(data).reduce((result, key) =>
+      Object.assign({}, { key: data[key] }, { key: color() }), {});
 }
 
 function mainReducer(state = initialState, action) {
+  let indicators;
+  let indicatorKeys;
+  let predictions;
+  let predictionKeys;
+  let newState;
+
   switch (action.type) {
     case SET_DATA:
-      const indicators = mapColor(action.payload.indicators);
-      const indicatorKeys = Object.keys(indicators);
-      const predictions = mapColor(action.payload.predictions);
-      const predictionKeys = Object.keys(predictions);
-      state = state.set('indicators', state.get('indicators')
+      indicators = mapColor(action.payload.indicators);
+      indicatorKeys = Object.keys(indicators);
+      predictions = mapColor(action.payload.predictions);
+      predictionKeys = Object.keys(predictions);
+
+      newState = state.set('indicators', state.get('indicators')
         .mergeDeep(indicators)
         .filter((value, key) => indicatorKeys.indexOf(key) !== -1)
-      );
-      state = state.set('predictions', state.get('predictions')
+      ).set('predictions', state.get('predictions')
         .mergeDeep(predictions)
         .filter((value, key) => predictionKeys.indexOf(key) !== -1)
-      );
-      state = state.set('datasize', Math.max(1, action.payload.datasize)); // Avoid slider error
-      if (state.get('offset') > state.get('datasize')) {
-        state = state.set('offset', state.get('datasize'));
+      ).set('datasize', Math.max(1, action.payload.datasize)); // Avoid slider error
+      if (newState.get('offset') > newState.get('datasize')) {
+        newState = newState.set('offset', newState.get('datasize'));
       }
-      state = state.set('maxValue', action.payload.maxValue);
-      state = state.set('minValue', action.payload.minValue);
-      return state.set('labels', fromJS(action.payload.labels));
+      return newState.set('maxValue', action.payload.maxValue)
+        .set('minValue', action.payload.minValue)
+        .set('labels', fromJS(action.payload.labels));
     case TOGGLE_PREDICTION:
       return state.setIn(['predictions', action.payload.key, 'show'], action.payload.value);
     case TOGGLE_INDICATOR:

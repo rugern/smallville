@@ -1,4 +1,4 @@
-import React, {PropTypes} from 'react';
+import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { push } from 'react-router-redux';
 import { createStructuredSelector } from 'reselect';
@@ -6,7 +6,7 @@ import AppBar from 'material-ui/AppBar';
 import Menu from 'material-ui/Menu';
 import MenuItem from 'material-ui/MenuItem';
 
-import {toggleSidebar} from '../Sidebar/actions';
+import { toggleSidebar } from '../Sidebar/actions';
 import Sidebar from '../Sidebar';
 
 export class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function

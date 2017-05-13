@@ -1,24 +1,19 @@
-import { take, takeEvery, call, put, select, takeLatest, apply, throttle } from 'redux-saga/effects';
-import { buffers } from 'redux-saga'
+import { takeEvery, call, put, select, takeLatest, apply } from 'redux-saga/effects';
+import queryString from 'query-string';
 
 import appSagas from '../App/sagas';
-import { createChannel } from '../../utils/sagaUtils';
 import {
   setData,
-  getData,
 } from './actions';
 import {
   clearInfo,
+  setModel,
 } from '../App/actions';
 import {
-  SET_DATA,
-  GET_DATA,
   SET_OFFSET,
   SET_LIMIT,
   START_TRAIN,
-  SET_EPOCHS,
   DELETE_MODEL,
-  DATAFILE_CHANGED,
 } from './constants';
 import {
   selectOffset,
@@ -26,102 +21,82 @@ import {
   selectEpochs,
 } from './selectors';
 import {
-  SET_CONNECTION_STATUS,
-  SET_METROPOLIS_STATUS,
-  GET_MODELS,
+  SET_DATAFILE,
 } from '../App/constants';
+import {
+  selectModel,
+  selectDatafile,
+} from '../App/selectors';
+import api from '../../utils/api';
 
-export function* takeConnectionStatus(socket) {
-  while (true) {
-    const action = yield take(SET_CONNECTION_STATUS);
-    yield put(getData());
-    const epochs = yield(select(selectEpochs()));
-    yield apply(socket, socket.emit, [SET_EPOCHS, epochs]);
-  }
-}
-
-export function* takeMetropolisStatus(socket) {
-  while (true) {
-    const action = yield take(SET_METROPOLIS_STATUS);
-    if (action.payload === 'Idle') {
-      yield call(emitGetData, socket);
-      yield apply(socket, socket.emit, [GET_MODELS]);
-    }
-  }
-}
-
-export function* takeDataChannel(socket) {
-  const dataChannel = yield call(createChannel, socket, SET_DATA);
-  while (true) {
-    const payload = yield take(dataChannel, buffers.sliding(5));
-    yield put(setData(payload));
-  }
-}
-
-function* emitGetData(socket) {
-  const offset = yield select(selectOffset());
+function* getData() {
   const limit = yield select(selectLimit());
-  yield apply(socket, socket.emit, [GET_DATA, {offset, limit}]);
+  const offset = yield select(selectOffset());
+  const datafile = yield select(selectDatafile());
+  const model = yield select(selectModel());
+  const epochs = yield select(selectEpochs());
+  const query = queryString.parse({ limit, offset, datafile, model, epochs });
+  const response = yield call(api.getData, query);
+  yield put(setData(response));
 }
 
-export function* takeGetData(socket) {
-  yield throttle(200, GET_DATA, emitGetData, socket);
+function* setOffset() {
+  yield call(getData);
 }
 
-export function* takeSetOffset(socket) {
-  yield throttle(200, SET_OFFSET, emitGetData, socket);
+export function* takeSetOffset() {
+  yield takeLatest(SET_OFFSET, setOffset);
 }
 
-export function* takeSetLimit(socket) {
-  yield throttle(200, SET_LIMIT, emitGetData, socket);
+function* setLimit() {
+  yield call(getData);
 }
 
-export function* emitStartTrain(socket) {
-  while (true) {
-    const action = yield take(START_TRAIN);
-    yield put(clearInfo());
-    yield apply(socket, socket.emit, [action.type]);
+export function* takeSetLimit() {
+  yield takeLatest(SET_LIMIT, setLimit);
+}
+
+function* setDatafile() {
+  yield call(getData);
+}
+
+export function* takeSetDatafile() {
+  yield takeLatest(SET_DATAFILE, setDatafile);
+}
+
+function* emitStartTrain(socket, action) {
+  yield put(clearInfo());
+  yield apply(socket, socket.emit, [action.type]);
+}
+
+function* takeStartTrain(socket) {
+  yield takeEvery(START_TRAIN, emitStartTrain, socket);
+}
+
+function* deleteModel(model) {
+  const currentModel = yield select(selectModel());
+  if (currentModel === model) {
+    yield put(setModel(''));
   }
+  yield call(api.deleteModel, model);
+  yield call(getData);
 }
 
-export function* emitEpochs(socket) {
-  while (true) {
-    const action = yield take(SET_EPOCHS);
-    yield apply(socket, socket.emit, [action.type, action.payload]);
-  }
-}
-
-export function* emitDeleteModel(socket) {
-  while (true) {
-    const action = yield take(DELETE_MODEL);
-    yield apply(socket, socket.emit, [action.type, action.payload]);
-  }
-}
-
-export function* datafileChangedChannel(socket) {
-  const changedChannel = yield call(createChannel, socket, DATAFILE_CHANGED);
-  while (true) {
-    const payload = yield take(changedChannel, buffers.sliding(5));
-    yield call(emitGetData, socket);
-  }
+export function* takeDeleteModel() {
+  yield takeEvery(DELETE_MODEL, deleteModel);
 }
 
 export function* receiveWebsocketData(socket) {
   yield [
-    call(takeConnectionStatus, socket),
-    call(takeDataChannel, socket),
-    call(emitGetData, socket),
-    call(emitStartTrain, socket),
-    call(emitEpochs, socket),
-    call(takeSetOffset, socket),
-    call(takeSetLimit, socket),
-    call(emitDeleteModel, socket),
-    call(datafileChangedChannel, socket),
-    call(takeMetropolisStatus, socket),
+    call(takeStartTrain, socket),
   ];
 }
 
 export default [
   receiveWebsocketData,
+  takeSetLimit,
+  takeSetOffset,
+  takeSetDatafile,
+  takeDeleteModel,
   ...appSagas,
 ];

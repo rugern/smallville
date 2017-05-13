@@ -7,7 +7,7 @@ import {
   SET_DATAFILES,
   SET_INFO,
   CLEAR_INFO,
-  SET_MODEL_NAME,
+  SET_MODEL,
   SET_MODELS,
 } from './constants';
 
@@ -44,9 +44,9 @@ export function clearInfo() {
   };
 }
 
-export function setModelName(payload) {
+export function setModel(payload) {
   return {
-    type: SET_MODEL_NAME,
+    type: SET_MODEL,
     payload,
   };
 }

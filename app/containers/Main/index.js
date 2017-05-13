@@ -6,7 +6,7 @@ import Divider from 'material-ui/Divider';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import Slider from 'material-ui/Slider';
-import {List, ListItem} from 'material-ui/List';
+import { List } from 'material-ui/List';
 import Delete from 'material-ui/svg-icons/action/delete';
 
 import CustomListItem from '../../components/CustomListItem';
@@ -16,8 +16,7 @@ import Row from '../../components/Row';
 import Info from '../../components/Info';
 import Chart from '../../components/Chart';
 import PlotList from '../../components/PlotList';
-import makeSelectMain from './selectors';
-import {
+import makeSelectMain, {
   selectPredictions,
   selectIndicators,
   selectLabels,
@@ -68,25 +67,12 @@ const Message = styled.div`
 font-size: 12px;
 `;
 
-const infoStyle = {
-  boxShadow: 'none',
-  overflow: 'scroll',
-  height: '300px',
-  border: '1px solid white',
-};
-
 const outerSliderStyle = {
   width: 'calc(100% - 100px)',
 };
 
 const sliderStyle = {
   margin: 0,
-};
-
-const itemStyle = {
-  fontSize: '12px',
-  padding: '10px',
-  marginLeft: '14px',
 };
 
 const listStyle = {
@@ -99,22 +85,69 @@ const textFieldStyle = {
 
 export class Main extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
 
-  isRunning = () => this.props.metropolisStatus !== 'Idle' || this.props.connectionStatus !== 'connect';
+  constructor(props) {
+    super(props);
+    this.state = {
+      newModelName: '',
+    };
+  }
+
+  setDatafile(newValue) {
+    if (!this.isPickerAvailable()) {
+      return;
+    }
+    this.props.dispatch(setDatafile(newValue));
+  }
+
+  setModelName(newValue) {
+    if (!this.isPickerAvailable()) {
+      return;
+    }
+    this.props.dispatch(setModelName(newValue));
+  }
+
+  deleteModel(value, evt) {
+    evt.stopPropagation();
+    if (!this.isPickerAvailable()) {
+      return;
+    }
+    this.props.dispatch(deleteModel(value));
+  }
+
+  createNewModel() {
+    this.props.dispatch(setModelName(this.state.newModelName));
+    this.setState({
+      newModelName: '',
+    });
+  }
+
+  updateNewModelName(newValue) {
+    this.setState({
+      newModelName: newValue,
+    });
+  }
+
+  isRunAvailable = () => this.props.metropolisStatus === 'Idle'
+    && this.props.connectionStatus === 'connect'
+    && this.props.modelName !== ''
+    && this.props.datafile !== '';
+
+  isPickerAvailable = () => this.props.metropolisStatus === 'Idle'
+    && this.props.connectionStatus === 'connect';
 
   render() {
-    const models = this.props.models.map((model, index) => 
-      <CustomListItem active={this.props.modelName === model} key={index}
-        deactivated={this.isRunning()}
-        onClick={() => !this.isRunning() && this.props.setModelName(model)}>
-        <span>{model}</span>
-        <Delete onTouchTap={(evt) => this.props.deleteModel(evt, model)}/>
+    const models = this.props.models.map((model, index) =>
+      <CustomListItem active={this.props.modelName === model} key={index}>
+        <button onClick={this.setModelName.bind(this, model)}>{model}</button>
+        <Delete onTouchTap={this.deleteModel.bind(this, model)} />
       </CustomListItem>
     );
 
     const datafiles = this.props.datafiles.map((datafile, index) =>
-      <CustomListItem active={this.props.datafile === datafile} key={index}
-        deactivated={this.isRunning()}
-        onClick={() => !this.isRunning() && this.props.setDatafile(datafile)}>
+      <CustomListItem
+        active={this.props.datafile === datafile} key={index}
+        onClick={this.setDatafile.bind(this, datafile)}
+      >
         <span>{datafile}</span>
       </CustomListItem>
     );
@@ -127,11 +160,15 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
       <Body>
         <Row>
           <StyledColumn width={3}>
-            <PlotList header="Indicators" items={this.props.indicators}
-              toggleItem={this.props.toggleIndicator}/>
+            <PlotList
+              header="Indicators" items={this.props.indicators}
+              toggleItem={this.props.toggleIndicator}
+            />
             <Divider />
-            <PlotList header="Predictions" items={this.props.predictions}
-              toggleItem={this.props.togglePrediction}/>
+            <PlotList
+              header="Predictions" items={this.props.predictions}
+              toggleItem={this.props.togglePrediction}
+            />
           </StyledColumn>
 
           <Column width={9}>
@@ -151,9 +188,15 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                       {models}
                     </List>
 
-                    <TextField floatingLabelText="New model" value={this.props.modelName}
-                      disabled={this.isRunning()} style={textFieldStyle}
-                      onChange={(evt, newValue) => this.props.setModelName(newValue)}/>
+                    <TextField
+                      floatingLabelText="New model" value={this.state.newModelName}
+                      disabled={this.props.datafile.length === 0} style={textFieldStyle}
+                      onChange={(evt, newValue) => this.updateNewModelName(newValue)}
+                    />
+                    <RaisedButton
+                      label="Create model" primary
+                      onClick={this.createNewModel.bind(this)} disabled={this.props.datafile.length === 0}
+                    />
                   </StyledColumn>
                 </Row>
               </Column>
@@ -176,40 +219,50 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                 </Row>
                 <Row>
                   <Label>Epochs: {this.props.epochs}</Label>
-                  <Slider min={1} max={20} step={1} value={this.props.epochs}
-                    disabled={this.isRunning()}
+                  <Slider
+                    min={1} max={20} step={1} value={this.props.epochs}
+                    disabled={!this.isPickerAvailable()}
                     style={outerSliderStyle} sliderStyle={sliderStyle}
-                    onChange={(evt, newValue) => this.props.setEpochs(newValue)} />
+                    onChange={(evt, newValue) => this.props.setEpochs(newValue)}
+                  />
                 </Row>
 
                 <Row>
                   <Label>Offset: {this.props.offset}</Label>
-                  <Slider min={0} max={this.props.datasize} step={1} value={this.props.offset}
-                    disabled={this.isRunning()}
+                  <Slider
+                    min={0} max={this.props.datasize} step={1} value={this.props.offset}
+                    disabled={!this.isPickerAvailable()}
                     style={outerSliderStyle} sliderStyle={sliderStyle}
-                    onChange={(evt, newValue) => this.props.setOffset(newValue)} />
+                    onChange={(evt, newValue) => this.props.setOffset(newValue)}
+                  />
                 </Row>
 
                 <Row>
                   <Label>Limit: {this.props.limit}</Label>
-                  <Slider min={1} max={200} step={1} value={this.props.limit}
-                    disabled={this.isRunning()}
+                  <Slider
+                    min={1} max={200} step={1} value={this.props.limit}
+                    disabled={!this.isPickerAvailable()}
                     style={outerSliderStyle} sliderStyle={sliderStyle}
-                    onChange={(evt, newValue) => this.props.setLimit(newValue)} />
+                    onChange={(evt, newValue) => this.props.setLimit(newValue)}
+                  />
                 </Row>
                 <Row>
-                  <RaisedButton label="Train" primary={true} 
+                  <RaisedButton
+                    label="Train" primary
                     onClick={this.props.startTrain}
-                    disabled={this.isRunning()}/>
+                    disabled={!this.isRunAvailable()}
+                  />
                 </Row>
               </StyledColumn>
             </Row>
           </Column>
         </Row>
         <Row>
-          <Chart indicators={this.props.indicators} min={this.props.minValue}
+          <Chart
+            indicators={this.props.indicators} min={this.props.minValue}
             max={this.props.maxValue}
-            predictions={this.props.predictions} labels={this.props.labels} />
+            predictions={this.props.predictions} labels={this.props.labels}
+          />
         </Row>
       </Body>
     );
@@ -217,6 +270,7 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
 }
 
 Main.propTypes = {
+  dispatch: PropTypes.func.isRequired,
   connectionStatus: PropTypes.string.isRequired,
   metropolisStatus: PropTypes.string.isRequired,
   indicators: PropTypes.object.isRequired,
@@ -226,20 +280,19 @@ Main.propTypes = {
   togglePrediction: PropTypes.func.isRequired,
   startTrain: PropTypes.func.isRequired,
   modelName: PropTypes.string.isRequired,
-  sidebarOpen: PropTypes.bool.isRequired,
   epochs: PropTypes.number.isRequired,
   offset: PropTypes.number.isRequired,
   limit: PropTypes.number.isRequired,
-  deleteModel: PropTypes.func.isRequired,
   datafiles: PropTypes.array.isRequired,
   datafile: PropTypes.string.isRequired,
   models: PropTypes.array.isRequired,
-  setDatafile: PropTypes.func.isRequired,
-  setModelName: PropTypes.func.isRequired,
   datasize: PropTypes.number.isRequired,
   info: PropTypes.array.isRequired,
   minValue: PropTypes.number.isRequired,
   maxValue: PropTypes.number.isRequired,
+  setLimit: PropTypes.func.isRequired,
+  setOffset: PropTypes.func.isRequired,
+  setEpochs: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -265,18 +318,13 @@ const mapStateToProps = createStructuredSelector({
 
 function mapDispatchToProps(dispatch) {
   return {
+    dispatch,
     toggleIndicator: (payload) => dispatch(toggleIndicator(payload)),
     togglePrediction: (payload) => dispatch(togglePrediction(payload)),
     startTrain: () => dispatch(startTrain()),
-    setModelName: (payload) => dispatch(setModelName(payload)),
     setEpochs: (payload) => dispatch(setEpochs(payload)),
     setOffset: (payload) => dispatch(setOffset(payload)),
     setLimit: (payload) => dispatch(setLimit(payload)),
-    deleteModel: (evt, payload) => {
-      evt.stopPropagation();
-      dispatch(deleteModel(payload));
-    },
-    setDatafile: (payload) => dispatch(setDatafile(payload)),
   };
 }
 

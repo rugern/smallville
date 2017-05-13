@@ -4,8 +4,7 @@
 *
 */
 
-import React, {PropTypes} from 'react';
-import styled from 'styled-components';
+import React, { PropTypes } from 'react';
 import Paper from 'material-ui/Paper';
 
 function ControlPanel(props) {

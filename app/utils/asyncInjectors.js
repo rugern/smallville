@@ -61,7 +61,7 @@ export function injectAsyncSagas(store, isValid) {
       '(app/utils...) injectAsyncSagas: Received an empty `sagas` array'
     );
 
-    sagas.map(saga => store.runSaga(saga, sharedDependencies));
+    sagas.map((saga) => store.runSaga(saga, sharedDependencies));
   };
 }
 

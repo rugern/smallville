@@ -1,11 +1,9 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import makeSelectTest from './selectors';
-import Paper from 'material-ui/Paper';
 import styled from 'styled-components';
 import RaisedButton from 'material-ui/RaisedButton';
-import {List, ListItem} from 'material-ui/List';
+import { List } from 'material-ui/List';
 
 import CustomListItem from '../../components/CustomListItem';
 import Column from '../../components/Column';
@@ -19,12 +17,13 @@ import {
   selectDatafiles,
   selectDatafile,
   selectModelName,
+  selectInfo,
 } from '../App/selectors';
 import {
   setModelName,
   setDatafile,
 } from '../App/actions';
-import {
+import makeSelectTest, {
   selectStartMoney,
   selectEndMoney,
   selectStayMoney,
@@ -45,27 +44,54 @@ const listStyle = {
   margin: '0 0 20px 0',
 };
 
+const Message = styled.div`
+font-size: 12px;
+`;
+
 function calculateProfit(dividend, divisor) {
-  return divisor ? Math.round((dividend - divisor) * 1000 / divisor) / 10 : 0;
+  return divisor ? Math.round((dividend - divisor) * (1000 / divisor)) / 10 : 0;
 }
 
 export class Test extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
 
-  isRunning = () => this.props.metropolisStatus !== 'Idle' || this.props.connectionStatus !== 'connect';
+  setModelName(newValue) {
+    if (!this.isPickerAvailable()) {
+      return;
+    }
+    this.props.dispatch(setModelName(newValue));
+  }
+
+  setDatafile(newValue) {
+    if (!this.isPickerAvailable()) {
+      return;
+    }
+    this.props.dispatch(setDatafile(newValue));
+  }
+
+  isRunAvailable = () => this.props.metropolisStatus === 'Idle'
+    && this.props.connectionStatus === 'connect'
+    && this.props.modelName !== ''
+    && this.props.datafile !== '';
+
+  isPickerAvailable = () => this.props.metropolisStatus === 'Idle'
+    && this.props.connectionStatus === 'connect';
 
   render() {
-    const models = this.props.models.map((model, index) => 
-      <CustomListItem active={this.props.modelName === model} key={index}
-        deactivated={this.isRunning()}
-        onClick={() => !this.isRunning() && this.props.setModelName(model)}>
-        <span>{model}</span>
+    const info = this.props.info.slice().reverse().map((entry, index) =>
+      <Message key={index}>{entry}</Message>
+    );
+
+    const models = this.props.models.map((model, index) =>
+      <CustomListItem active={this.props.modelName === model} key={index}>
+        <button onClick={this.setModelName.bind(this, model)}>{model}</button>
       </CustomListItem>
     );
 
     const datafiles = this.props.datafiles.map((datafile, index) =>
-      <CustomListItem active={this.props.datafile === datafile} key={index}
-        deactivated={this.isRunning()}
-        onClick={() => !this.isRunning() && this.props.setDatafile(datafile)}>
+      <CustomListItem
+        active={this.props.datafile === datafile} key={index}
+        onClick={this.setDatafile.bind(this, datafile)}
+      >
         <span>{datafile}</span>
       </CustomListItem>
     );
@@ -73,20 +99,6 @@ export class Test extends React.PureComponent { // eslint-disable-line react/pre
     return (
       <Body>
         <Row>
-          <Column width={2}>
-            <Row>
-              <StyledColumn>
-                <Info>Connection status: {this.props.connectionStatus}</Info>
-              </StyledColumn>
-            </Row>
-
-            <Row>
-              <StyledColumn>
-                <Info>Metropolis status: {this.props.metropolisStatus}</Info>
-              </StyledColumn>
-            </Row>
-          </Column>
-
           <Column width={4}>
             <Row>
               <StyledColumn>
@@ -105,56 +117,74 @@ export class Test extends React.PureComponent { // eslint-disable-line react/pre
             </Row>
           </Column>
 
-          <StyledColumn width={6}>
+          <Column width={4}>
             <Row>
-              <Column width={6}>
-                <Info>Starting money</Info>
-                <Info>{this.props.startMoney}</Info>
-              </Column>
+              <StyledColumn>
+                <Info>Connection status: {this.props.connectionStatus}</Info>
+                <Info>Metropolis status: {this.props.metropolisStatus}</Info>
+              </StyledColumn>
             </Row>
 
             <Row>
-              <Column width={6}>
-                <Info>Ending money</Info>
-                <Info>{this.props.endMoney}</Info>
-              </Column>
+              <StyledColumn>
+                <Row>
+                  <Column width={6}>
+                    <Info>Starting money</Info>
+                    <Info>{this.props.startMoney}</Info>
+                  </Column>
+                </Row>
 
-              <Column width={6}>
-                <Info>Profit</Info>
-                <Info>{calculateProfit(this.props.endMoney, this.props.startMoney)}%</Info>
-              </Column>
+                <Row>
+                  <Column width={6}>
+                    <Info>Ending money</Info>
+                    <Info>{this.props.endMoney}</Info>
+                  </Column>
+
+                  <Column width={6}>
+                    <Info>Profit</Info>
+                    <Info>{calculateProfit(this.props.endMoney, this.props.startMoney)}%</Info>
+                  </Column>
+                </Row>
+
+                <Row>
+                  <Column width={6}>
+                    <Info>Stay money</Info>
+                    <Info>{this.props.stayMoney}</Info>
+                  </Column>
+
+                  <Column width={6}>
+                    <Info>Relative profit</Info>
+                    <Info>{calculateProfit(this.props.endMoney, this.props.stayMoney)}%</Info>
+                  </Column>
+                </Row>
+
+                <Row>
+                  <Column width={6}>
+                    <Info>Buys</Info>
+                    <Info>{this.props.buys}</Info>
+                  </Column>
+
+                  <Column width={6}>
+                    <Info>Sells</Info>
+                    <Info>{this.props.sells}</Info>
+                  </Column>
+                </Row>
+              </StyledColumn>
             </Row>
 
             <Row>
-              <Column width={6}>
-                <Info>Stay money</Info>
-                <Info>{this.props.stayMoney}</Info>
-              </Column>
-
-              <Column width={6}>
-                <Info>Relative profit</Info>
-                <Info>{calculateProfit(this.props.endMoney, this.props.stayMoney)}%</Info>
-              </Column>
+              <StyledColumn>
+                <RaisedButton
+                  label="Test" primary
+                  onClick={this.props.startTest} disabled={!this.isRunAvailable()}
+                />
+              </StyledColumn>
             </Row>
+          </Column>
 
-            <Row>
-              <Column width={6}>
-                <Info>Buys</Info>
-                <Info>{this.props.buys}</Info>
-              </Column>
 
-              <Column width={6}>
-                <Info>Sells</Info>
-                <Info>{this.props.sells}</Info>
-              </Column>
-            </Row>
-
-            <Row>
-              <Column width={6}>
-                <RaisedButton label="Test" primary={true}
-                  onClick={this.props.startTest} disabled={this.isRunning()}/>
-              </Column>
-            </Row>
+          <StyledColumn width={6} height="450px">
+            {info}
           </StyledColumn>
         </Row>
       </Body>
@@ -163,6 +193,7 @@ export class Test extends React.PureComponent { // eslint-disable-line react/pre
 }
 
 Test.propTypes = {
+  dispatch: PropTypes.func.isRequired,
   connectionStatus: PropTypes.string.isRequired,
   metropolisStatus: PropTypes.string.isRequired,
   startMoney: PropTypes.number.isRequired,
@@ -171,11 +202,11 @@ Test.propTypes = {
   datafiles: PropTypes.array.isRequired,
   models: PropTypes.array.isRequired,
   modelName: PropTypes.string.isRequired,
-  setDatafile: PropTypes.func.isRequired,
   datafile: PropTypes.string.isRequired,
-  setModelName: PropTypes.func.isRequired,
   buys: PropTypes.number.isRequired,
   sells: PropTypes.number.isRequired,
+  info: PropTypes.array.isRequired,
+  startTest: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -188,6 +219,7 @@ const mapStateToProps = createStructuredSelector({
   models: selectModels(),
   datafiles: selectDatafiles(),
   datafile: selectDatafile(),
+  info: selectInfo(),
   modelName: selectModelName(),
   buys: selectBuys(),
   sells: selectSells(),
@@ -195,9 +227,8 @@ const mapStateToProps = createStructuredSelector({
 
 function mapDispatchToProps(dispatch) {
   return {
+    dispatch,
     startTest: () => dispatch(startTest()),
-    setModelName: (payload) => dispatch(setModelName(payload)),
-    setDatafile: (payload) => dispatch(setDatafile(payload)),
   };
 }
 

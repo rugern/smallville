@@ -6,8 +6,8 @@ display: flex;
 flex-direction: column;
 padding: 20px;
 margin: 10px;
-width: calc(100% * ${props => props.width ? props.width / 12 : 1});
-height: ${props => props.height || 'initial'};
+width: calc(100% * ${(props) => props.width ? props.width / 12 : 1});
+height: ${(props) => props.height || 'initial'};
 overflow-x: scroll;
 `;
 

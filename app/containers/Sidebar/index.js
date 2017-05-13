@@ -20,10 +20,12 @@ import {
 
 function Sidebar(props) {
   return (
-    <Drawer docked={false} open={props.sidebarOpen}
-      onRequestChange={props.toggleSidebar} >
-      <MenuItem primaryText="Close" onClick={props.toggleSidebar}
-        rightIcon={<ContentClear />} />
+    <Drawer
+      docked={false} open={props.sidebarOpen} onRequestChange={props.toggleSidebar}
+    >
+      <MenuItem
+        primaryText="Close" onClick={props.toggleSidebar} rightIcon={<ContentClear />}
+      />
       {props.children}
     </Drawer>
   );

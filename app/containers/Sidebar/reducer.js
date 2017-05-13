@@ -17,8 +17,8 @@ const initialState = fromJS({
 function sidebarReducer(state = initialState, action) {
   switch (action.type) {
     case TOGGLE_SIDEBAR:
-      const value = action.value === undefined ? !state.get('sidebarOpen') : action.value;
-      return state.set('sidebarOpen', value);
+      return state.set('sidebarOpen', action.value === undefined ?
+        !state.get('sidebarOpen') : action.value);
     case DEFAULT_ACTION:
       return state;
     default:

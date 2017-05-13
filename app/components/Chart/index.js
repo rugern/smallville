@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
-import {Line} from 'react-chartjs-2';
-import styled from 'styled-components';
+import { Line } from 'react-chartjs-2';
 
 const datasetOptions = {
   fill: false,
@@ -30,7 +29,7 @@ function createChartOptions(min, max) {
 }
 
 function constructPlots(plotDatas) {
-  const rgbaConstructor = (r, g, b) => (a=1) => `rgba(${r},${g},${b},${a})`;
+  const rgbaConstructor = (r, g, b) => (a = 1) => `rgba(${r},${g},${b},${a})`;
 
   return Object.keys(plotDatas).reduce((datasets, key) => {
     const plotData = plotDatas[key];
@@ -38,10 +37,10 @@ function constructPlots(plotDatas) {
       return datasets;
     }
 
-    const {r, g, b} = plotData;
+    const { r, g, b } = plotData;
     const color = rgbaConstructor(r, g, b);
     const dataset = Object.assign({}, datasetOptions, {
-      data: plotData.data, 
+      data: plotData.data,
       label: key,
       pointBorderColor: color(),
       backgroundColor: color(0.6),
@@ -62,10 +61,9 @@ function Chart(props) {
   const chartOptions = createChartOptions(props.min, props.max);
 
   return (
-    <Line options={chartOptions} data={{
-      labels: props.labels,
-      datasets,
-    }} />
+    <Line
+      options={chartOptions} data={{ labels: props.labels, datasets }}
+    />
   );
 }
 

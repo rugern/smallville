@@ -1,9 +1,9 @@
-import { eventChannel } from 'redux-saga'
+import { eventChannel } from 'redux-saga';
 
 export function createChannel(socket, eventName) {
   return eventChannel((emit) => {
     const handler = (data) => {
-      const payload = data ? data : eventName;
+      const payload = data || eventName;
       emit(payload);
     };
 

@@ -1,5 +1,4 @@
-import { take, takeEvery, call, put, select, takeLatest, apply, throttle } from 'redux-saga/effects';
-import { buffers } from 'redux-saga'
+import { call, put, apply, takeEvery } from 'redux-saga/effects';
 
 import { createChannel } from '../../utils/sagaUtils';
 import appSagas from '../App/sagas';
@@ -10,25 +9,31 @@ import {
 import {
   setTestResult,
 } from './actions';
+import {
+  clearInfo,
+} from '../App/actions';
 
-export function* emitStartTrain(socket) {
-  while (true) {
-    const action = yield take(START_TEST);
-    yield apply(socket, socket.emit, [action.type]);
-  }
+function* emitStartTest(socket, action) {
+  yield put(clearInfo());
+  yield apply(socket, socket.emit, [action.type]);
+}
+
+export function* takeStartTest(socket) {
+  yield takeEvery(START_TEST, emitStartTest, socket);
+}
+
+function* testResult(payload) {
+  yield put(setTestResult(payload));
 }
 
 export function* takeResultChannel(socket) {
   const resultChannel = yield call(createChannel, socket, SET_TEST_RESULT);
-  while (true) {
-    const payload = yield take(resultChannel, buffers.sliding(5));
-    yield put(setTestResult(payload));
-  }
+  yield takeEvery(resultChannel, testResult);
 }
 
 export function* receiveWebsocketData(socket) {
   yield [
-    call(emitStartTrain, socket),
+    call(takeStartTest, socket),
     call(takeResultChannel, socket),
   ];
 }
