@@ -1,4 +1,4 @@
-import { takeEvery, call, put, select, takeLatest, apply } from 'redux-saga/effects';
+import { takeEvery, call, put, select, takeLatest, apply, throttle } from 'redux-saga/effects';
 import queryString from 'query-string';
 
 import appSagas from '../App/sagas';
@@ -13,7 +13,6 @@ import {
   SET_OFFSET,
   SET_LIMIT,
   START_TRAIN,
-  DELETE_MODEL,
 } from './constants';
 import {
   selectOffset,
@@ -22,6 +21,8 @@ import {
 } from './selectors';
 import {
   SET_DATAFILE,
+  SET_METROPOLIS_STATUS,
+  DELETE_MODEL,
 } from '../App/constants';
 import {
   selectModel,
@@ -33,10 +34,8 @@ function* getData() {
   const limit = yield select(selectLimit());
   const offset = yield select(selectOffset());
   const datafile = yield select(selectDatafile());
-  const model = yield select(selectModel());
-  const epochs = yield select(selectEpochs());
-  const query = queryString.parse({ limit, offset, datafile, model, epochs });
-  const response = yield call(api.getData, query);
+  const query = queryString.stringify({ limit, offset });
+  const response = yield call(api.getData, datafile, query);
   yield put(setData(response));
 }
 
@@ -45,7 +44,7 @@ function* setOffset() {
 }
 
 export function* takeSetOffset() {
-  yield takeLatest(SET_OFFSET, setOffset);
+  yield throttle(200, SET_OFFSET, setOffset);
 }
 
 function* setLimit() {
@@ -53,7 +52,7 @@ function* setLimit() {
 }
 
 export function* takeSetLimit() {
-  yield takeLatest(SET_LIMIT, setLimit);
+  yield throttle(200, SET_LIMIT, setLimit);
 }
 
 function* setDatafile() {
@@ -66,24 +65,28 @@ export function* takeSetDatafile() {
 
 function* emitStartTrain(socket, action) {
   yield put(clearInfo());
-  yield apply(socket, socket.emit, [action.type]);
+  const datafile = yield select(selectDatafile());
+  const epochs = yield select(selectEpochs());
+  const model = yield select(selectModel());
+  yield apply(socket, socket.emit, [action.type, { datafile, epochs, model }]);
 }
 
 function* takeStartTrain(socket) {
   yield takeEvery(START_TRAIN, emitStartTrain, socket);
 }
 
-function* deleteModel(model) {
-  const currentModel = yield select(selectModel());
-  if (currentModel === model) {
-    yield put(setModel(''));
+function* setMetropolisStatus(action) {
+  switch (action.payload) {
+    case 'Finished training':
+      yield call(getData);
+      break;
+    default:
+      // Do nothing
   }
-  yield call(api.deleteModel, model);
-  yield call(getData);
 }
 
-export function* takeDeleteModel() {
-  yield takeEvery(DELETE_MODEL, deleteModel);
+export function* takeSetMetropolisStatus() {
+  yield takeEvery(SET_METROPOLIS_STATUS, setMetropolisStatus);
 }
 
 export function* receiveWebsocketData(socket) {
@@ -92,8 +95,24 @@ export function* receiveWebsocketData(socket) {
   ];
 }
 
+function* deleteModel(action) {
+  const datafile = yield select(selectDatafile());
+  const currentModel = yield select(selectModel());
+  if (currentModel === action.payload.model) {
+    yield put(setModel(''));
+  }
+
+  yield call(api.deleteModel, datafile, action.payload.model);
+  yield call(getData);
+}
+
+export function* takeDeleteModel() {
+  yield takeEvery(DELETE_MODEL, deleteModel);
+}
+
 export default [
   receiveWebsocketData,
+  takeSetMetropolisStatus,
   takeSetLimit,
   takeSetOffset,
   takeSetDatafile,

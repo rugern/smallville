@@ -4,12 +4,14 @@ import { buffers } from 'redux-saga';
 import { createChannel } from '../../utils/sagaUtils';
 import {
   setConnectionStatus,
+  setMetropolisStatus,
   setInfo,
   setDatafiles,
   setModels,
 } from './actions';
 import {
   ADD_METROPOLIS_INFO,
+  SET_METROPOLIS_STATUS,
   GET_DATAFILES,
   SET_DATAFILE,
 } from './constants';
@@ -35,6 +37,14 @@ function* takeDisconnectChannel(socket) {
   }
 }
 
+function* takeMetropolisStatus(socket) {
+  const statusChannel = yield call(createChannel, socket, SET_METROPOLIS_STATUS);
+  while (true) {
+    const payload = yield take(statusChannel, buffers.sliding(5));
+    yield put(setMetropolisStatus(payload));
+  }
+}
+
 function* takeInfoChannel(socket) {
   const infoChannel = yield call(createChannel, socket, ADD_METROPOLIS_INFO);
   while (true) {
@@ -48,6 +58,7 @@ export function* receiveWebsocketData(socket) {
     call(takeConnectChannel, socket),
     call(takeDisconnectChannel, socket),
     call(takeInfoChannel, socket),
+    call(takeMetropolisStatus, socket),
   ];
 }
 

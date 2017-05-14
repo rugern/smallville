@@ -16,11 +16,11 @@ import {
   selectModels,
   selectDatafiles,
   selectDatafile,
-  selectModelName,
+  selectModel,
   selectInfo,
 } from '../App/selectors';
 import {
-  setModelName,
+  setModel,
   setDatafile,
 } from '../App/actions';
 import makeSelectTest, {
@@ -54,11 +54,11 @@ function calculateProfit(dividend, divisor) {
 
 export class Test extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
 
-  setModelName(newValue) {
+  setModel(newValue) {
     if (!this.isPickerAvailable()) {
       return;
     }
-    this.props.dispatch(setModelName(newValue));
+    this.props.dispatch(setModel(newValue));
   }
 
   setDatafile(newValue) {
@@ -68,12 +68,12 @@ export class Test extends React.PureComponent { // eslint-disable-line react/pre
     this.props.dispatch(setDatafile(newValue));
   }
 
-  isRunAvailable = () => this.props.metropolisStatus === 'Idle'
+  isRunAvailable = () => this.props.metropolisStatus !== 'Busy'
     && this.props.connectionStatus === 'connect'
     && this.props.modelName !== ''
     && this.props.datafile !== '';
 
-  isPickerAvailable = () => this.props.metropolisStatus === 'Idle'
+  isPickerAvailable = () => this.props.metropolisStatus !== 'Busy'
     && this.props.connectionStatus === 'connect';
 
   render() {
@@ -83,7 +83,7 @@ export class Test extends React.PureComponent { // eslint-disable-line react/pre
 
     const models = this.props.models.map((model, index) =>
       <CustomListItem active={this.props.modelName === model} key={index}>
-        <button onClick={this.setModelName.bind(this, model)}>{model}</button>
+        <button onClick={this.setModel.bind(this, model)}>{model}</button>
       </CustomListItem>
     );
 
@@ -220,7 +220,7 @@ const mapStateToProps = createStructuredSelector({
   datafiles: selectDatafiles(),
   datafile: selectDatafile(),
   info: selectInfo(),
-  modelName: selectModelName(),
+  modelName: selectModel(),
   buys: selectBuys(),
   sells: selectSells(),
 });

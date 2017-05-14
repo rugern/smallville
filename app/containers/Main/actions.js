@@ -13,7 +13,6 @@ import {
   SET_EPOCHS,
   SET_OFFSET,
   SET_LIMIT,
-  DELETE_MODEL,
 } from './constants';
 
 export function setData(payload) {
@@ -66,13 +65,6 @@ export function setOffset(payload) {
 export function setLimit(payload) {
   return {
     type: SET_LIMIT,
-    payload,
-  };
-}
-
-export function deleteModel(payload) {
-  return {
-    type: DELETE_MODEL,
     payload,
   };
 }

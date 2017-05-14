@@ -8,7 +8,10 @@ import {
   SET_INFO,
   CLEAR_INFO,
   SET_MODEL,
+  ADD_MODEL,
   SET_MODELS,
+  GET_DATAFILES,
+  DELETE_MODEL,
 } from './constants';
 
 export function getModels() {
@@ -44,6 +47,13 @@ export function clearInfo() {
   };
 }
 
+export function addModel(payload) {
+  return {
+    type: ADD_MODEL,
+    payload,
+  };
+}
+
 export function setModel(payload) {
   return {
     type: SET_MODEL,
@@ -74,6 +84,19 @@ export function setMetropolisStatus(payload) {
 export function setConnectionStatus(payload) {
   return {
     type: SET_CONNECTION_STATUS,
+    payload,
+  };
+}
+
+export function getDatafiles() {
+  return {
+    type: GET_DATAFILES,
+  };
+}
+
+export function deleteModel(payload) {
+  return {
+    type: DELETE_MODEL,
     payload,
   };
 }

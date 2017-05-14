@@ -9,6 +9,8 @@ import {
   SET_INFO,
   CLEAR_INFO,
   SET_DATAFILES,
+  ADD_MODEL,
+  DELETE_MODEL,
 } from './constants';
 
 const initialState = fromJS({
@@ -29,6 +31,12 @@ function appReducer(state = initialState, action) {
       return state.set('metropolisStatus', action.payload);
     case SET_MODEL:
       return state.set('model', action.payload);
+    case ADD_MODEL:
+      return state.get('models').indexOf(action.payload) === -1 ?
+        state.update('models', (models) => models.push(action.payload))
+        : state;
+    case DELETE_MODEL:
+      return state.update('models', (models) => models.delete(action.payload.index));
     case SET_INFO:
       return state.updateIn(['info'], (info) => info.push(action.payload));
     case CLEAR_INFO:

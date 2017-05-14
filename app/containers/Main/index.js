@@ -34,7 +34,6 @@ import {
   setEpochs,
   setOffset,
   setLimit,
-  deleteModel,
 } from './actions';
 import {
   selectConnectionStatus,
@@ -43,11 +42,13 @@ import {
   selectDatafiles,
   selectDatafile,
   selectInfo,
-  selectModelName,
+  selectModel,
 } from '../App/selectors';
 import {
-  setModelName,
+  setModel,
+  addModel,
   setDatafile,
+  deleteModel,
 } from '../App/actions';
 import {
   selectSidebarOpen,
@@ -99,23 +100,23 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
     this.props.dispatch(setDatafile(newValue));
   }
 
-  setModelName(newValue) {
+  setModel(newValue) {
     if (!this.isPickerAvailable()) {
       return;
     }
-    this.props.dispatch(setModelName(newValue));
+    this.props.dispatch(setModel(newValue));
   }
 
-  deleteModel(value, evt) {
+  deleteModel(model, index, evt) {
     evt.stopPropagation();
     if (!this.isPickerAvailable()) {
       return;
     }
-    this.props.dispatch(deleteModel(value));
+    this.props.dispatch(deleteModel({ model, index }));
   }
 
   createNewModel() {
-    this.props.dispatch(setModelName(this.state.newModelName));
+    this.props.dispatch(addModel(this.state.newModelName));
     this.setState({
       newModelName: '',
     });
@@ -127,19 +128,19 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
     });
   }
 
-  isRunAvailable = () => this.props.metropolisStatus === 'Idle'
+  isRunAvailable = () => this.props.metropolisStatus !== 'Busy'
     && this.props.connectionStatus === 'connect'
     && this.props.modelName !== ''
     && this.props.datafile !== '';
 
-  isPickerAvailable = () => this.props.metropolisStatus === 'Idle'
+  isPickerAvailable = () => this.props.metropolisStatus !== 'Busy'
     && this.props.connectionStatus === 'connect';
 
   render() {
     const models = this.props.models.map((model, index) =>
       <CustomListItem active={this.props.modelName === model} key={index}>
-        <button onClick={this.setModelName.bind(this, model)}>{model}</button>
-        <Delete onTouchTap={this.deleteModel.bind(this, model)} />
+        <button onClick={this.setModel.bind(this, model)}>{model}</button>
+        <Delete onTouchTap={this.deleteModel.bind(this, model, index)} />
       </CustomListItem>
     );
 
@@ -302,7 +303,7 @@ const mapStateToProps = createStructuredSelector({
   labels: selectLabels(),
   connectionStatus: selectConnectionStatus(),
   metropolisStatus: selectMetropolisStatus(),
-  modelName: selectModelName(),
+  modelName: selectModel(),
   sidebarOpen: selectSidebarOpen(),
   epochs: selectEpochs(),
   offset: selectOffset(),

@@ -23,3 +23,5 @@ export const SET_MODELS = 'set_models';
 export const SET_DATAFILES = 'set_datafiles';
 export const GET_DATAFILES = 'get_datafiles';
 export const GET_DATAFILE = 'get_datafile';
+export const ADD_MODEL = 'add_model';
+export const DELETE_MODEL = 'delete_model';

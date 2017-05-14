@@ -1,24 +1,22 @@
 export default (function createApi() {
   const baseUrl = 'http://localhost:5000';
 
-  const deleteModel = (model) => {
+  const deleteModel = (datafile, model) => {
     const options = {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-      body: {
-        model,
-      },
+      method: 'DELETE',
     };
-    return fetch(`${baseUrl}/models?action=delete`, options);
+    return fetch(`${baseUrl}/datafiles/${datafile}/models/${model}`, options)
+      .then((response) => response.text());
   };
 
-  const getData = (query) => fetch(`${baseUrl}/data?${query}`);
+  const getData = (datafile, query) => fetch(`${baseUrl}/datafiles/${datafile}/data?${query}`)
+    .then((response) => response.json());
 
-  const getDatafiles = () => fetch(`${baseUrl}/datafiles`);
+  const getDatafiles = () => fetch(`${baseUrl}/datafiles`)
+    .then((response) => response.json());
 
-  const getModels = (id) => fetch(`${baseUrl}/models/${id}`);
+  const getModels = (datafile) => fetch(`${baseUrl}/datafiles/${datafile}/models`)
+    .then((response) => response.json());
 
   return {
     deleteModel,

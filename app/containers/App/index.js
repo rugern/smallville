@@ -8,8 +8,15 @@ import MenuItem from 'material-ui/MenuItem';
 
 import { toggleSidebar } from '../Sidebar/actions';
 import Sidebar from '../Sidebar';
+import {
+  getDatafiles,
+} from './actions';
 
 export class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
+  componentDidMount() {
+    this.props.getDatafiles();
+  }
+
   render() {
     return (
       <div>
@@ -31,6 +38,7 @@ App.propTypes = {
   toggleSidebar: PropTypes.func.isRequired,
   gotoTraining: PropTypes.func.isRequired,
   gotoTest: PropTypes.func.isRequired,
+  getDatafiles: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -47,6 +55,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(toggleSidebar());
     },
     toggleSidebar: () => dispatch(toggleSidebar()),
+    getDatafiles: () => dispatch(getDatafiles()),
   };
 }
 

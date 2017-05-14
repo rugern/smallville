@@ -33,8 +33,11 @@ function color() {
 }
 
 function mapColor(data) {
-  return Object.keys(data).reduce((result, key) =>
-      Object.assign({}, { key: data[key] }, { key: color() }), {});
+  return Object.keys(data).reduce((result, key) => {
+    const nextResult = Object.assign({}, result);
+    nextResult[key] = Object.assign({}, data[key], color());
+    return nextResult;
+  }, {});
 }
 
 function mainReducer(state = initialState, action) {
@@ -51,17 +54,21 @@ function mainReducer(state = initialState, action) {
       predictions = mapColor(action.payload.predictions);
       predictionKeys = Object.keys(predictions);
 
-      newState = state.set('indicators', state.get('indicators')
+      newState = state
+      .set('indicators', state.get('indicators')
         .mergeDeep(indicators)
         .filter((value, key) => indicatorKeys.indexOf(key) !== -1)
       ).set('predictions', state.get('predictions')
         .mergeDeep(predictions)
         .filter((value, key) => predictionKeys.indexOf(key) !== -1)
       ).set('datasize', Math.max(1, action.payload.datasize)); // Avoid slider error
+
       if (newState.get('offset') > newState.get('datasize')) {
         newState = newState.set('offset', newState.get('datasize'));
       }
-      return newState.set('maxValue', action.payload.maxValue)
+
+      return newState
+        .set('maxValue', action.payload.maxValue)
         .set('minValue', action.payload.minValue)
         .set('labels', fromJS(action.payload.labels));
     case TOGGLE_PREDICTION:
