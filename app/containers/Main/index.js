@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import styled from 'styled-components';
-import Divider from 'material-ui/Divider';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
 import Slider from 'material-ui/Slider';
@@ -41,7 +40,6 @@ import {
   selectModels,
   selectDatafiles,
   selectDatafile,
-  selectInfo,
   selectModel,
 } from '../App/selectors';
 import {
@@ -62,10 +60,6 @@ margin: 0 auto;
 const Label = styled.h5`
 width: 100px;
 margin: 0;
-`;
-
-const Message = styled.div`
-font-size: 12px;
 `;
 
 const outerSliderStyle = {
@@ -153,10 +147,6 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
       </CustomListItem>
     );
 
-    const info = this.props.info.slice().reverse().map((entry, index) =>
-      <Message key={index}>{entry}</Message>
-    );
-
     return (
       <Body>
         <Row>
@@ -165,16 +155,18 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
               header="Indicators" items={this.props.indicators}
               toggleItem={this.props.toggleIndicator}
             />
-            <Divider />
+          </StyledColumn>
+
+          <StyledColumn width={3}>
             <PlotList
               header="Predictions" items={this.props.predictions}
               toggleItem={this.props.togglePrediction}
             />
           </StyledColumn>
 
-          <Column width={9}>
+          <Column width={6}>
             <Row>
-              <Column width={4}>
+              <Column width={12}>
                 <Row>
                   <StyledColumn>
                     <List style={listStyle}>
@@ -201,63 +193,61 @@ export class Main extends React.PureComponent { // eslint-disable-line react/pre
                   </StyledColumn>
                 </Row>
               </Column>
+            </Row>
 
-              <StyledColumn width={8} height="450px">
-                {info}
-              </StyledColumn>
+          </Column>
+        </Row>
+
+        <Row>
+          <StyledColumn>
+            <Row>
+              <Column width={6}>
+                <Info>Connection status: {this.props.connectionStatus}</Info>
+              </Column>
+
+              <Column width={6}>
+                <Info>Metropolis status: {this.props.metropolisStatus}</Info>
+              </Column>
+            </Row>
+            <Row>
+              <Label>Epochs: {this.props.epochs}</Label>
+              <Slider
+                min={1} max={100} step={1} value={this.props.epochs}
+                disabled={!this.isPickerAvailable()}
+                style={outerSliderStyle} sliderStyle={sliderStyle}
+                onChange={(evt, newValue) => this.props.setEpochs(newValue)}
+              />
             </Row>
 
             <Row>
-              <StyledColumn>
-                <Row>
-                  <Column width={6}>
-                    <Info>Connection status: {this.props.connectionStatus}</Info>
-                  </Column>
-
-                  <Column width={6}>
-                    <Info>Metropolis status: {this.props.metropolisStatus}</Info>
-                  </Column>
-                </Row>
-                <Row>
-                  <Label>Epochs: {this.props.epochs}</Label>
-                  <Slider
-                    min={1} max={20} step={1} value={this.props.epochs}
-                    disabled={!this.isPickerAvailable()}
-                    style={outerSliderStyle} sliderStyle={sliderStyle}
-                    onChange={(evt, newValue) => this.props.setEpochs(newValue)}
-                  />
-                </Row>
-
-                <Row>
-                  <Label>Offset: {this.props.offset}</Label>
-                  <Slider
-                    min={0} max={this.props.datasize} step={1} value={this.props.offset}
-                    disabled={!this.isPickerAvailable()}
-                    style={outerSliderStyle} sliderStyle={sliderStyle}
-                    onChange={(evt, newValue) => this.props.setOffset(newValue)}
-                  />
-                </Row>
-
-                <Row>
-                  <Label>Limit: {this.props.limit}</Label>
-                  <Slider
-                    min={1} max={200} step={1} value={this.props.limit}
-                    disabled={!this.isPickerAvailable()}
-                    style={outerSliderStyle} sliderStyle={sliderStyle}
-                    onChange={(evt, newValue) => this.props.setLimit(newValue)}
-                  />
-                </Row>
-                <Row>
-                  <RaisedButton
-                    label="Train" primary
-                    onClick={this.props.startTrain}
-                    disabled={!this.isRunAvailable()}
-                  />
-                </Row>
-              </StyledColumn>
+              <Label>Offset: {this.props.offset}</Label>
+              <Slider
+                min={0} max={this.props.datasize} step={1} value={this.props.offset}
+                disabled={!this.isPickerAvailable()}
+                style={outerSliderStyle} sliderStyle={sliderStyle}
+                onChange={(evt, newValue) => this.props.setOffset(newValue)}
+              />
             </Row>
-          </Column>
+
+            <Row>
+              <Label>Limit: {this.props.limit}</Label>
+              <Slider
+                min={1} max={1000} step={1} value={this.props.limit}
+                disabled={!this.isPickerAvailable()}
+                style={outerSliderStyle} sliderStyle={sliderStyle}
+                onChange={(evt, newValue) => this.props.setLimit(newValue)}
+              />
+            </Row>
+            <Row>
+              <RaisedButton
+                label="Train" primary
+                onClick={this.props.startTrain}
+                disabled={!this.isRunAvailable()}
+              />
+            </Row>
+          </StyledColumn>
         </Row>
+
         <Row>
           <Chart
             indicators={this.props.indicators} min={this.props.minValue}
@@ -288,7 +278,6 @@ Main.propTypes = {
   datafile: PropTypes.string.isRequired,
   models: PropTypes.array.isRequired,
   datasize: PropTypes.number.isRequired,
-  info: PropTypes.array.isRequired,
   minValue: PropTypes.number.isRequired,
   maxValue: PropTypes.number.isRequired,
   setLimit: PropTypes.func.isRequired,
@@ -312,7 +301,6 @@ const mapStateToProps = createStructuredSelector({
   datafiles: selectDatafiles(),
   datafile: selectDatafile(),
   datasize: selectDatasize(),
-  info: selectInfo(),
   maxValue: selectMax(),
   minValue: selectMin(),
 });
